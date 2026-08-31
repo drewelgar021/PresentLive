@@ -1,16 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-
 import { useState } from 'react'
-import { BrowserRouter as Router, Route, Routes, NavLink }
+//import { BrowserRouter as Router, Route, Routes, NavLink }
+import { BrowserRouter as Router }
     from 'react-router-dom'
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css"
 
-import Container from "react-bootstrap/Container";
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
-import Stack from "react-bootstrap/Stack"
-import Button from "react-bootstrap/Button"
 
 import CodeEditor from "@uiw/react-textarea-code-editor"
 import rehypePrism from 'rehype-prism-plus';

@@ -7,6 +7,8 @@ import "./App.css"
 
 import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
+import Navbar from "react-bootstrap/Navbar";
+import Nav from "react-bootstrap/Nav";
 
 import CodeEditor from "@uiw/react-textarea-code-editor"
 import rehypePrism from "rehype-prism-plus";
@@ -21,14 +23,21 @@ const PLACEHOLDER_PMD = "---\n"
                       + "<!-- display: title -->\n\n"
                       + "# Welcome to PresentLive!\n"
 
+function Header() {
+    return (
+        <header>
+            <Row><h1>PresentLive</h1></Row>
+            <Row>nav</Row>
+        </header>
+    );
+}
+
+
 function App() {
 
     return (
         <Router><div className="App">
-            <header>
-                <h1>PresentLive</h1>
-            </header>
-
+            <Header/>
             <Editor/>
         </div></Router>
     );
@@ -38,7 +47,7 @@ function Editor() {
     const [md, setmd] = useState(PLACEHOLDER_PMD);
     const [model, setmodel] = useState(presentMDToModel(PLACEHOLDER_PMD));
 
-    function updatePreview(presentmd: string) {
+    async function updatePreview(presentmd: string) {
         setmd(presentmd);
         setmodel(presentMDToModel(presentmd));
     }

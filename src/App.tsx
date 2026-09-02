@@ -11,6 +11,7 @@ import Col from "react-bootstrap/Col"
 import CodeEditor from "@uiw/react-textarea-code-editor"
 import rehypePrism from "rehype-prism-plus";
 
+import DeckPreviewer from "./DeckPreviewer.tsx";
 import { presentMDToModel } from "./deckconverter.js";
 
 const PLACEHOLDER_PMD = "---\n"
@@ -19,7 +20,6 @@ const PLACEHOLDER_PMD = "---\n"
                       + "---\n\n"
                       + "<!-- display: title -->\n\n"
                       + "# Welcome to PresentLive!\n"
-
 
 function App() {
 
@@ -36,11 +36,11 @@ function App() {
 
 function Editor() {
     const [md, setmd] = useState(PLACEHOLDER_PMD);
-    const [odf, setodf] = useState(JSON.stringify(presentMDToModel(PLACEHOLDER_PMD)));
+    const [model, setmodel] = useState(presentMDToModel(PLACEHOLDER_PMD));
 
     function updatePreview(presentmd: string) {
         setmd(presentmd);
-        setodf(JSON.stringify(presentMDToModel(presentmd)));
+        setmodel(presentMDToModel(presentmd));
     }
 
     return (
@@ -66,7 +66,7 @@ function Editor() {
                     />
                 </Col>
                 <Col>
-                    {odf}
+                    <DeckPreviewer deck={model}/>
                 </Col>
             </Row>
         </div>

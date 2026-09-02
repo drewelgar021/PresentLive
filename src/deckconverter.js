@@ -860,7 +860,7 @@ function toODF(model) {
  * Performs all the steps to convert a PresentMD string straight to an ODF
  * string.
  * 
- * @param {string} A string of presentMD to be converted to ODF.
+ * @param {string} A string of PresentMD to be converted to ODF.
  *
  * @return {string} A string containing the ODF converted from the PresentMD
  *                  input.
@@ -868,3 +868,15 @@ function toODF(model) {
 export function presentMDToODF(presentMD) {
     return toODF(toModel(parsePresentMD(presentMD).blocks));
 }
+
+/**
+ * Performs all the steps to convert a PresentMD string to a deck model.
+ *
+ * @param {string} A string of PresentMD to be converted to a deck model.
+ *
+ * @return {string} The deck model object.
+ */
+export function presentMDToModel(presentMD) {
+    return toModel(parsePresentMD(presentMD).blocks);
+}
+

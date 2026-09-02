@@ -17,7 +17,8 @@
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
-    "rehype-prism-plus": "^2.0.2"
+    "rehype-prism-plus": "^2.0.2",
+    "soffice": "^1.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

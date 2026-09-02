@@ -11,7 +11,7 @@ import Col from "react-bootstrap/Col"
 import CodeEditor from "@uiw/react-textarea-code-editor"
 import rehypePrism from "rehype-prism-plus";
 
-import { presentMDToODF } from "./deckconverter.js";
+import { presentMDToModel } from "./deckconverter.js";
 
 const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
@@ -36,12 +36,11 @@ function App() {
 
 function Editor() {
     const [md, setmd] = useState(PLACEHOLDER_PMD);
-    const [odf, setodf] = useState(presentMDToODF(PLACEHOLDER_PMD));
+    const [odf, setodf] = useState(JSON.stringify(presentMDToModel(PLACEHOLDER_PMD)));
 
     function updatePreview(presentmd: string) {
         setmd(presentmd);
-        setodf(presentMDToODF(presentmd));
-
+        setodf(JSON.stringify(presentMDToModel(presentmd)));
     }
 
     return (

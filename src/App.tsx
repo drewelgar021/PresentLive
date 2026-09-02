@@ -1,7 +1,7 @@
-import { useState } from 'react'
+import { useState } from "react"
 //import { BrowserRouter as Router, Route, Routes, NavLink }
 import { BrowserRouter as Router }
-    from 'react-router-dom'
+    from "react-router-dom"
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css"
 
@@ -9,7 +9,9 @@ import Row from "react-bootstrap/Row"
 import Col from "react-bootstrap/Col"
 
 import CodeEditor from "@uiw/react-textarea-code-editor"
-import rehypePrism from 'rehype-prism-plus';
+import rehypePrism from "rehype-prism-plus";
+
+import { presentMDToODF } from "./deckconverter.js";
 
 const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
@@ -34,6 +36,14 @@ function App() {
 
 function Editor() {
     const [md, setmd] = useState(PLACEHOLDER_PMD);
+    const [odf, setodf] = useState(presentMDToODF(PLACEHOLDER_PMD));
+
+    function updatePreview(presentmd: string) {
+        setmd(presentmd);
+        setodf(presentMDToODF(presentmd));
+
+    }
+
     return (
         <div className="Editor">
             <Row>
@@ -42,7 +52,7 @@ function Editor() {
                         language="md"
                         placeholder="Write PresentMD here"
                         value={md}
-                        onChange={(e) => setmd(e.target.value)}
+                        onChange={(e) => updatePreview(e.target.value)}
                         padding={15}
                         rehypePlugins={[
                             [rehypePrism, {
@@ -57,7 +67,7 @@ function Editor() {
                     />
                 </Col>
                 <Col>
-                    {md}
+                    {odf}
                 </Col>
             </Row>
         </div>

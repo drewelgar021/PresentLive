@@ -33,7 +33,7 @@ function Editor() {
     }
 
     return (
-        <div className="Editor">
+        <div className="m-2">
             <Row>
                 <Col>
                     <CodeEditor
@@ -47,10 +47,11 @@ function Editor() {
                                 ignoreMissing: true, showLineNumbers: true
                             }]
                         ]}
+                        className="mx-1 rounded"
                         style={{
                             fontFamily: "JetBrains Mono,monospace",
                             fontSize: 16,
-                            borderRadius: 10,
+                            borderRadius: 10
                         }}
                     />
                 </Col>

@@ -1,6 +1,7 @@
 import { useState } from "react"
 import CodeEditor from "@uiw/react-textarea-code-editor"
 import rehypePrism from "rehype-prism-plus";
+import { AspectRatio } from "@/components/ui/aspect-ratio"
 
 import { presentMDToModel } from "./deckconverter.js";
 
@@ -64,7 +65,13 @@ function Editor() {
 }
 
 function DeckPreviewer(props: { deck: Deck }) {
-    return <>{JSON.stringify(props.deck.slides)}</>;
+    return (
+        <AspectRatio ratio={ 16 / 9 }>
+            <div className="w-full h-full overflow-hidden">
+                {JSON.stringify(props.deck)}
+            </div>
+        </AspectRatio>
+    );
 }
 
 export default Editor;

@@ -1,19 +1,35 @@
-import { BrowserRouter as Router, Route, Routes, NavLink }
+//import { useState } from "react";
+import { BrowserRouter as Router, Route, Routes, NavLink, useLocation }
     from "react-router-dom"
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Editor from "./Editor";
 
 import Row from "react-bootstrap/Row"
-import Nav from "react-bootstrap/Nav";
+
+const navLinks = [
+    {name: "Editor", path: "editor"},
+    {name: "Other", path: "other"}
+]
 
 function Header() {
+    const location = useLocation();
     return (
-        <header>
+        <header className="pt-3 px-2">
             <Row><h1>PresentLive</h1></Row>
-            <Row><Nav>
+            <Row><ul className="nav nav-tabs justify-content-center mt-3">
+                {navLinks.map((navLink) => (
+                
+                    <li className="nav-item"><NavLink
+                            className={location.pathname == navLink.name ?
+                                "nav-link active" : "nav-link"}
+                            to={navLink.path}>
 
-            </Nav></Row>
+                        {navLink.name}
+
+                    </NavLink></li>
+                ))}
+            </ul></Row>
         </header>
     );
 }
@@ -25,7 +41,8 @@ function App() {
         <Router><div className="App">
             <Header/>
             <Routes>
-                <Route index path="/" element={<Editor/>} />
+                <Route index path="editor" element={<Editor/>} />
+                <Route path="other" element={<p>other</p>}/>
             </Routes>
         </div></Router>
     );

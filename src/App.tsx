@@ -4,13 +4,14 @@ import { BrowserRouter as Router, Route, Routes, NavLink, useLocation }
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Editor from "./Editor";
+import Viewer from "./Viewer";
 
 import Row from "react-bootstrap/Row"
 
 const navLinks = [
-    {name: "Editor", path: "editor"},
-    {name: "Other", path: "other"}
-]
+    {name: "Edit", path: "editor"},
+    {name: "Watch", path: "viewer"}
+];
 
 function Header() {
     const location = useLocation();
@@ -36,13 +37,12 @@ function Header() {
 
 
 function App() {
-
     return (
         <Router><div className="App">
             <Header/>
             <Routes>
                 <Route index path="editor" element={<Editor/>} />
-                <Route path="other" element={<p>other</p>}/>
+                <Route path="viewer" element={<Viewer/>} />
             </Routes>
         </div></Router>
     );

@@ -47,7 +47,7 @@ function Editor() {
     return (
         <div className="m-2">
             <Row>
-                <Col>
+                <Col className="h-auto"><AspectRatio ratio={4/3}>
                     <CodeEditor
                         language="md"
                         placeholder="Write PresentMD here"
@@ -59,14 +59,13 @@ function Editor() {
                                 ignoreMissing: true, showLineNumbers: true
                             }]
                         ]}
-                        className="mx-1 rounded"
+                        className="mx-1 h-full rounded rounded overflow-scroll"
                         style={{
                             fontFamily: "JetBrains Mono,monospace",
-                            fontSize: 16,
-                            borderRadius: 10
+                            fontSize: 16
                         }}
                     />
-                </Col>
+                </AspectRatio></Col>
                 <Col>
                     <DeckPreviewer deck={model}/>
                 </Col>
@@ -90,7 +89,7 @@ function DeckPreviewer(props: { deck: Deck }) {
     }
 
     return (<>
-        <AspectRatio ratio={ 16 / 9 }>
+        <AspectRatio ratio={16/9}>
             <div className="w-full h-full overflow-hidden border border-dark rounded p-4">
                 <SlideRender deck={props.deck} slideNo={slideNo - 1}/>
             </div>
@@ -111,15 +110,5 @@ function DeckPreviewer(props: { deck: Deck }) {
 function SlideRender(props: { deck: Deck, slideNo: number }) {
     return <>{JSON.stringify(props.deck.slides[props.slideNo])}</>;
 }
-
-function renderSlide(slide: Slide) {
-    return <></>;
-}
-
-function parseDeck(deck: Deck) {
-    return deck.slides.map((s: Slide) => renderSlide);
-}
-
-
 
 export default Editor;

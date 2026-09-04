@@ -1,7 +1,14 @@
+:root {
+    --foreground: #f0f0f0;
+    --background: #0f0f0f;
+    --border: #a0a0a0;
+}
+
 .App {
     font-family: "Noto Serif" serif;
-    color: #f0f0f0;
-    background-color: #0f0f0f;
+    color: var(--foreground);
+    background-color: var(--background);
+    height: 100vh;
 }
 
 header {
@@ -9,9 +16,9 @@ header {
 }
 
 .nav-link {
-    color: #f0f0f0;
+    color: var(--foreground);
 }
 
 .nav-link:hover {
-    color: #d0d0d0;
+    color: var(--foreground);
 }

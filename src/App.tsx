@@ -21,7 +21,7 @@ function Header() {
             <Row><ul className="nav nav-tabs justify-content-center mt-3">
                 {navLinks.map((navLink) => (
                 
-                    <li className="nav-item"><NavLink
+                    <li className="nav-item" key={navLink.name}><NavLink
                             className={location.pathname == navLink.name ?
                                 "nav-link active" : "nav-link"}
                             to={navLink.path}>

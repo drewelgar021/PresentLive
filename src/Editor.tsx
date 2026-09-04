@@ -6,7 +6,7 @@ import { AspectRatio } from "./components/ui/aspect-ratio";
 import { Button } from "./components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
-import { presentMDToModel } from "./deckconverter.js";
+import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -15,8 +15,9 @@ const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
                       + "author: Me\n"
                       + "---\n\n"
-                      + "<!-- display: title -->\n\n"
-                      + "# Welcome to PresentLive!\n"
+                      + "<!-- layout: title -->\n\n"
+                      + "# Welcome to PresentLive!\n\n"
+                      + "Start writing your presentation here.\n"
 
 type Deck = {
     title?: string,
@@ -76,6 +77,12 @@ function Editor() {
 
 function DeckPreviewer(props: { deck: Deck }) {
     const [slideNo, setSlideNo] = useState<number>(1);
+    const preview = presentMDToJSX(props.deck);
+    
+    if (slideNo > props.deck.slides.length) {
+        setSlideNo(props.deck.slides.length);
+    }
+
     function decrementPage() {
         if (slideNo > 1) {
             setSlideNo(slideNo - 1);
@@ -90,8 +97,8 @@ function DeckPreviewer(props: { deck: Deck }) {
 
     return (<>
         <AspectRatio ratio={16/9}>
-            <div className="w-full h-full overflow-hidden border border-dark rounded p-4">
-                <SlideRender deck={props.deck} slideNo={slideNo - 1}/>
+            <div className="w-full h-full overflow-hidden border border-dark rounded p-2">
+                {preview[slideNo - 1]}
             </div>
         </AspectRatio>
 
@@ -105,10 +112,6 @@ function DeckPreviewer(props: { deck: Deck }) {
             </Button>
         </div>
     </>);
-}
-
-function SlideRender(props: { deck: Deck, slideNo: number }) {
-    return <>{JSON.stringify(props.deck.slides[props.slideNo])}</>;
 }
 
 export default Editor;

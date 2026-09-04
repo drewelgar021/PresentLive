@@ -1,27 +1,9 @@
 /**
- * @file deckconverter.js
+ * @file deckconverter.jsx
  * @author Drew Elgar
  */
 
 import { parsePresentMD } from "./presentMDparser.js";
-
-const PARSER_PATH = "./presentMDparser.js";
-
-const USAGE_ERROR_MSG = "Usage: node deckconverter.js <input | input-dir> "
-                      + "<output-dir> [--model]";
-const PATH_ERROR_MSG  = "Error: input path does not exist";
-
-const EMPTY_DECK_ERROR_MSG     = ": file is empty (skipping)";
-const NO_SLIDES_ERROR_MSG      = ": deck contains no slides (skipping)";
-const UNTERMINATED_FRONTMATTER_ERROR_MSG = ": deck contains unterminated "
-                                         + "frontmatter (skipping)";
-const NO_FRONTMATTER_ERROR_MSG = ": deck contains no frontmatter (skipping)"
-const ALL_DRAFTS_ERROR_MSG     = ": all slides in deck are drafts (skipping)";
-const NOT_PLAIN_TEXT_ERROR_MSG = ": not a plaintext file (skipping)";
-
-const NUM_DECKS_MSG = " decks to convert\n";
-const SUCCESS_MSG   = " decks converted";
-const FAILURE_MSG   = " decks could not be converted\n";
 
 const XML_INFO = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
 
@@ -366,6 +348,73 @@ function parseStyles(model) {
 
 
 /**
+ * Parses a JSON block to JSX.
+ * This function is called recursively on each element of `block.runs`, until an
+ * element with a `value` key is found, at which point it will return the text.
+ *
+ * @param {object} block - A single block to parse, which may
+ *                         recursively contain more blocks in its `runs`
+ *                         array.
+ *
+ * @return {JSX.Element} The parsed JSX slide content.
+ */
+function parseBlockToJSX(block) {
+    if (block.type == "text") {
+        // Minimum structure is a block of text.
+        return <>{block.value}</>;
+    }
+    if (block.kind == "heading") {
+        if (block.level == 1 || block.level == 2) {
+            return <h1>{block.runs.map(parseBlockToJSX)}</h1>;
+        }
+        return <h3>{block.runs.map(parseBlockToJSX)}</h3>;
+    }
+    if (block.kind == "paragraph") {
+        return <p>{block.runs.map(parseBlockToJSX)}</p>;
+    }
+
+    if (block.kind == "quote") {
+        return <p className="ml-2">{block.runs.map(parseBlockToJSX)}</p>;
+    }
+
+    if (block.kind == "list") {
+        const listItems = block.items.map((item) => {
+            const listItem = item.runs.map(parseBlockToJSX);
+            const sublist = item.items.length > 0 ?
+                <ul>
+                    {item.items.map((item) => <li>{item.runs.map(parseBlockToJSX)}</li>)}
+                </ul> :
+                <></>;
+            return (
+                <li>
+                    {listItem}
+                    {sublist}
+                </li>
+            );
+        })
+
+        if (block.ordered) {
+            return <ol>{listItems}</ol>
+        }
+        return <ul>{listItems}</ul>
+    }
+
+    if (block.type == "strong") {
+        return <b>{block.runs.map(parseBlockToJSX)}</b>;
+    }
+
+    if (block.type == "em") {
+        return <i>{block.runs.map(parseBlockToJSX)}</i>;
+    }
+
+    if (block.type == "strike") {
+        return <s>{block.runs.map(parseBlockToJSX)}</s>;
+    }
+
+    return <></>;
+}
+
+/**
  * Parses a JSON block to ODF slide content.
  * This function is called recursively on each element of `block.runs`, until an
  * element with a `value` key is found, at which point it will return the text.
@@ -561,10 +610,25 @@ function parseNotes(blocks) {
 }
 
 /**
+ * Parses a JSON slide structure to a JSX slide with the default layout.
+ * @param {Slide} slide - The JSON slide to parse to JSX.
+ * 
+ * @return {JSX.Element} A JSX slide containing the blocks in the provided slide
+ *                  structure, of the default layout.
+ */
+function parseDefaultSlideToJSX(slide) {
+    return (
+        <div className="w-full h-full">
+            {slide.content.map(parseBlockToJSX)}
+        </div>
+    );
+}
+
+/**
  * Parses a JSON slide structure to an ODF slide with the default layout.
  *
  * @param {Object} slide   - The JSON slide to parse to ODF.
- * @param {Stirng} [style] - Custom style suffix of the form "-sN" where N is
+ * @param {String} [style] - Custom style suffix of the form "-sN" where N is
  *                           the slide number.
  * @return {String} An ODF slide containing the blocks in the provided slide
  *                  structure, of the default layout.
@@ -634,13 +698,39 @@ function parseTitleTitle(slide) {
     return "";
 }
 
+/**
+ * Parses a JSON slide structure to a JSX slide with the title layout.
+ * This layout contains a title and a subtitle.
+ *
+ * @param {slide} slide - The JSON slide to parse to JSX.
+ *
+ * @return {JSX.Element} A JSX slide containing the blocks in the provided slide
+ *                       structure, of the title layout.
+ */
+function parseTitleSlideToJSX(slide) {
+    const titleBlock = slide.content
+        .filter((block) => block.kind == "heading"
+                && (block.level == "1" || block.level == "2"))[0];
+    const title = titleBlock ? parseBlockToJSX(titleBlock) : <></>;
+    const subtitleBlock = slide.content
+        .filter((block) => block.kind != "heading")[0];
+    const subtitle = subtitleBlock ? parseBlockToJSX(subtitleBlock) : <></>;
+
+    return (
+        <div className="w-full h-full d-flex flex-column
+                        justify-content-center align-items-center">
+            {title}
+            {subtitle}
+        </div>
+    );
+}
 
 /**
  * Parses a JSON slide structure to an ODF slide with the title layout.
  * This layout contains a title and a subtitle.
  *
  * @param {Object} slide   - The JSON slide to parse to ODF.
- * @param {Stirng} [style] - Custom style suffix of the form "-sN" where N is
+ * @param {String} [style] - Custom style suffix of the form "-sN" where N is
  *                           the slide number.
  * @return {String} An ODF slide containing the blocks in the provided slide
  *                  structure, of the title layout.
@@ -651,6 +741,33 @@ function parseTitleSlide(slide, style="") {
     const subtitleFrame = parseSubtitle(slide, style);
 
     return titleFrame + subtitleFrame;
+}
+
+
+/**
+ * Parses a JSON slide structure to a JSX slide with the section layout.
+ * This layout contains a title only.
+ *
+ * @param {slide} slide - The JSON slide to parse to JSX.
+ *
+ * @return {JSX.Element} A JSX slide containing the content provided in the JSON
+ *                       slide.
+ */
+function parseSectionSlideToJSX(slide) {
+    const titleBlock = slide.content
+        .filter((block) => block.kind == "heading"
+            && (block.level == "1" || block.level == "2"))[0];
+
+    if (titleBlock) {
+        return (
+            <div className="w-full h-full d-flex flex-column
+                            justify-content-center align-items-center">
+                {parseBlockToJSX(titleBlock)}
+            </div>
+        );
+    }
+
+    return <></>;
 }
 
 
@@ -702,6 +819,31 @@ function getRawTitle(slide) {
 
 }
 
+
+/**
+ * Generates an agenda based on the titles of all (non-draft) slides in the
+ * deck model.
+ * Blocks contained within this slide are ignored.
+ *
+ * @param {Deck} model - The model being parsed to ODF, from which each
+ *                       slide's title will be listed in the agenda.
+ * @return {JSX.Element} The agenda slide generated from the deck's slide
+ *                       titles.
+ */
+function generateAgendaJSX(model) {
+    const slides = model.slides
+                   .filter((slide) => slide.agenda === undefined && slide.draft === undefined);
+    const titles = slides.map(getRawTitle).filter((title) => title !== null);
+
+    return (<div className="w-full h-full">
+        <h1>Agenda</h1>
+        <ul>
+            {titles.map((title) => (<li>{title}</li>))}
+        </ul>
+    </div>);
+}
+
+
 /**
  * Generates an agenda based on the titles of all (non-draft) slides in the
  * deck model.
@@ -749,8 +891,47 @@ ${parseBlock(titleBlock)}
                         </text:p>
                     </text:list-item>\n`
     ).join("");
-    
+
     return titleFrame + open + titleList + close;
+}
+
+
+/**
+ * Parses a JSON slide structue to a JSX slide.
+ * It is assumed that the slide is valid.
+ *
+ * @param {Slide} slide - The JSON slide being parsed to ODF.
+ * @param {Deck} model - The deck model to use for generating an
+ *                        agenda slide.
+ *
+ * @return {JSX.Element} The single ODF slide parsed from the provided slide
+ *                       structure.
+ */
+function parseSlideToJSX(slide, model) {
+
+    const backgroundColor = slide.backgroundColor ?? model.backgroundColor ?? "#ffffff";
+    const textColor = model.color ?? "#000000";
+
+    const defaultLayoutParser = 
+        model.layout == "title" ?
+            (slide) => parseTitleSlideToJSX(slide) :
+        model.layout == "section" ?
+            (slide) => parseSectionSlideToJSX(slide) :
+        (slide) => parseDefaultSlideToJSX(slide);
+
+    const slideContents =
+        slide.agenda === null ? generateAgendaJSX(model) :
+        slide.layout == "title" ? parseTitleSlideToJSX(slide) :
+        slide.layout == "section" ? parseSectionSlideToJSX(slide) :
+        slide.layout == "default" ? parseDefaultSlideToJSX(slide) :
+        defaultLayoutParser(slide);
+
+    return (
+        <div className="w-full h-full p-4"
+             style={{backgroundColor: backgroundColor, color: textColor}}>
+            {slideContents}
+        </div>
+    );
 }
 
 
@@ -798,7 +979,7 @@ function parseSlide(slide, slideNo, model, defaultLayout="default") {
         slide.layout == "title" ? parseTitleSlide(slide, textStyle) :
         slide.layout == "section" ? parseSectionSlide(slide, textStyle) :
         slide.layout == "default" ? parseDefaultSlide(slide, textStyle) :
-        defaultLayoutParser(slide, textStyle) 
+        defaultLayoutParser(slide, textStyle);
 
     return open + slideContents + notes + SLIDE_CLOSE;
 }
@@ -840,7 +1021,6 @@ function parseMeta(model) {
          + `<dc:creator>${author}</dc:creator>\n` + META_CLOSE;
 }
 
-
 /**
  * Converts a JSON deck model into an ODF tree.
  * It is assumed that the deck model is valid.
@@ -854,6 +1034,12 @@ function toODF(model) {
     const body = parseBody(model);
     const meta = parseMeta(model);
     return XML_INFO + ROOT_OPEN + styles + body + meta + ROOT_CLOSE;
+}
+
+export function presentMDToJSX(model) {
+    return model.slides
+        .filter((slide) => slide.draft === undefined)
+        .map((slide) => parseSlideToJSX(slide, model));
 }
 
 /**
@@ -877,6 +1063,10 @@ export function presentMDToODF(presentMD) {
  * @return {string} The deck model object.
  */
 export function presentMDToModel(presentMD) {
-    return toModel(parsePresentMD(presentMD).blocks);
+    const model = toModel(parsePresentMD(presentMD).blocks);
+    return {
+        ...model,
+        slides: model.slides.filter((slide) => slide.draft === undefined)
+    };
 }
 

@@ -1,9 +1,9 @@
 import { useState } from "react";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import rehypePrism from "rehype-prism-plus";
-import { AspectRatio } from "./components/ui/aspect-ratio";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 
-import { Button } from "./components/ui/button";
+import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";

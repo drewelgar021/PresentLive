@@ -374,7 +374,7 @@ function parseBlockToJSX(block) {
     }
 
     if (block.kind == "quote") {
-        return <p className="ml-2">{block.runs.map(parseBlockToJSX)}</p>;
+        return <p className="quote"><i>{block.runs.map(parseBlockToJSX)}</i></p>;
     }
 
     if (block.kind == "list") {
@@ -442,7 +442,7 @@ function parseBlock(block) {
         if (block.value.match(/\[\^[0-9]*\]/)) {
             return "[Unsupported: footnote omitted]";
         }
-        
+
         // Minimum structure is a block of text.
         return escape(block.value);
     }
@@ -928,7 +928,8 @@ function parseSlideToJSX(slide, model) {
 
     return (
         <div className="w-full h-full p-4"
-             style={{backgroundColor: backgroundColor, color: textColor}}>
+             style={{backgroundColor: backgroundColor, color: textColor,
+                     "--bullet-color": textColor}}>
             {slideContents}
         </div>
     );

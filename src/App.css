@@ -12,11 +12,6 @@
     overflow: hidden;
 }
 
-Editor {
-    height: 100%;
-}
-
-
 header {
     text-align: center;
 }
@@ -27,4 +22,36 @@ header {
 
 .nav-link:hover {
     color: var(--foreground);
+}
+
+#viewer {
+    container-type: inline-size;
+}
+
+#viewer h1 {
+    font-size: 4cqi;
+}
+
+#viewer h3 {
+    font-size: 3cqi;
+}
+
+#viewer p {
+    font-size: 2cqi;
+}
+
+#viewer li {
+    font-size: 2cqi;
+}
+
+#viewer ol li {
+    list-style: decimal;
+}
+
+#viewer ul li {
+    list-style: outside;
+}
+
+#viewer .quote {
+    margin-left: 2cqi;
 }

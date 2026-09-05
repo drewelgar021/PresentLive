@@ -67,7 +67,7 @@ function Editor() {
                         }}
                     />
                 </AspectRatio></Col>
-                <Col>
+                <Col lg>
                     <DeckPreviewer deck={model}/>
                 </Col>
             </Row>
@@ -97,7 +97,8 @@ function DeckPreviewer(props: { deck: Deck }) {
 
     return (<>
         <AspectRatio ratio={16/9}>
-            <div className="w-full h-full overflow-hidden border border-dark rounded p-2">
+            <div className="w-full h-full overflow-hidden border border-dark rounded p-2"
+                 id="viewer">
                 {preview[slideNo - 1]}
             </div>
         </AspectRatio>

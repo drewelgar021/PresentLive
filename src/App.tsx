@@ -1,5 +1,5 @@
 //import { useState } from "react";
-import { BrowserRouter as Router, Route, Routes, NavLink, useLocation }
+import { BrowserRouter as Router, Route, Routes, NavLink, useLocation, Navigate }
     from "react-router-dom"
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
@@ -20,7 +20,6 @@ function Header() {
             <Row><h1>PresentLive</h1></Row>
             <Row><ul className="nav nav-tabs justify-content-center mt-3">
                 {navLinks.map((navLink) => (
-                
                     <li className="nav-item" key={navLink.name}><NavLink
                             className={location.pathname == navLink.name ?
                                 "nav-link active" : "nav-link"}
@@ -43,11 +42,11 @@ function App() {
             <Routes>
                 <Route index path="editor" element={<Editor/>} />
                 <Route path="viewer" element={<Viewer/>} />
+                <Route path="/" element={<Navigate to="editor"/>}/>
             </Routes>
         </div></Router>
     );
 }
-
 
 
 export default App

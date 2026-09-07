@@ -378,15 +378,15 @@ function parseBlockToJSX(block) {
     }
 
     if (block.kind == "list") {
-        const listItems = block.items.map((item) => {
+        const listItems = block.items.map((item, index) => {
             const listItem = item.runs.map(parseBlockToJSX);
             const sublist = item.items.length > 0 ?
                 <ul>
-                    {item.items.map((item) => <li>{item.runs.map(parseBlockToJSX)}</li>)}
+                    {item.items.map((item, index) => <li key={index}>{item.runs.map(parseBlockToJSX)}</li>)}
                 </ul> :
                 <></>;
             return (
-                <li>
+                <li key={index}>
                     {listItem}
                     {sublist}
                 </li>
@@ -838,7 +838,7 @@ function generateAgendaJSX(model) {
     return (<div className="w-full h-full">
         <h1>Agenda</h1>
         <ul>
-            {titles.map((title) => (<li>{title}</li>))}
+            {titles.map((title, index) => (<li key={index}>{title}</li>))}
         </ul>
     </div>);
 }

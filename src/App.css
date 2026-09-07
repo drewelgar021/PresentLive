@@ -2,6 +2,8 @@
     --foreground: #f0f0f0;
     --background: #0f0f0f;
     --border: #a0a0a0;
+    --secondary: #303030;
+    --secondary-foreground: #f0f0f0;
 }
 
 .App {

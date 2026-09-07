@@ -39,16 +39,25 @@ type Slide = {
 function Editor() {
     const [md, setmd] = useState<string>(PLACEHOLDER_PMD);
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
+    const [isPublic, setpublic] = useState<boolean>(false);
 
     async function updatePreview(presentmd: string) {
         setmd(presentmd);
         setmodel(presentMDToModel(presentmd));
     }
 
+    function togglePublic() {
+        setpublic(!isPublic);
+    }
+
+    function save() {
+        console.log("saving cunt");
+    }
+
     return (
         <div className="m-2">
             <Row>
-                <Col className="h-auto"><AspectRatio ratio={4/3}>
+                <Col lg className="h-auto"><AspectRatio ratio={4/3}>
                     <CodeEditor
                         language="md"
                         placeholder="Write PresentMD here"
@@ -66,6 +75,14 @@ function Editor() {
                             fontSize: 16
                         }}
                     />
+                    <div className="d-flex align-items-center">
+                        <Button className="mx-2 rounded" variant="outline" onClick={save}>
+                            Save/Share
+                        </Button>
+                        <input type="checkbox" className="mx-2"
+                            checked={isPublic} onChange={togglePublic}/>
+                        <label>Public</label>
+                    </div>
                 </AspectRatio></Col>
                 <Col lg>
                     <DeckPreviewer deck={model}/>
@@ -78,7 +95,7 @@ function Editor() {
 function DeckPreviewer(props: { deck: Deck }) {
     const [slideNo, setSlideNo] = useState<number>(1);
     const preview = presentMDToJSX(props.deck);
-    
+
     if (slideNo > props.deck.slides.length) {
         setSlideNo(props.deck.slides.length);
     }

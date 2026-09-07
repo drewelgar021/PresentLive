@@ -50,8 +50,25 @@ function Editor() {
         setpublic(!isPublic);
     }
 
-    function save() {
+    async function postPMD() {
+        return await fetch("https://comp2140-3ea651da.uqcloud.net/api/presentmd",
+            {
+                method: "POST",
+                body: md,
+                headers: {
+                    Authorization: `Bearer ${import.meta.env.API_KEY}`,
+                }
+            }
+        ).then((response) => response.ok ?
+                response.json() :
+                Promise.reject(new Error(response.statusText || "Unknown error."))
+        ).catch((error) => console.error(error.message));
+
+    }
+
+    async function save() {
         console.log("saving cunt");
+        console.log(postPMD());
     }
 
     return (

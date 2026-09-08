@@ -61,7 +61,7 @@ async function codeGenerator() {
     )
         .then((response) => response.ok ?
             response.json() :
-            Promise.reject(new Error(response.statusText || "Unknown error.")))
+            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
         .catch((error) => console.error(error.message));
 
     if (response.total == 0) {
@@ -101,7 +101,7 @@ function Editor() {
         })
         .then((response) => response.ok ?
             response.json() :
-            Promise.reject(new Error(response.statusText || "Unknown error.")))
+            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
         .catch((error) => console.error(error.message));
 
         if (response.total == 0) {
@@ -119,9 +119,38 @@ function Editor() {
             setcode(await codeGenerator())
         }
         const body = { code: code, contents: md };
-        return await fetch(`${API}/presentmd`,
+
+        const existing = await fetch (`${API}/presentmd?code=${code}`,
             {
-                method: "POST",
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                }
+            })
+            .then((response) => response.ok ?
+                response.json() :
+                Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+            .catch((error) => console.error(error.message));
+
+        if (existing.total == 0) {
+            return await fetch(`${API}/presentmd`,
+                {
+                    method: "POST",
+                    body: JSON.stringify(body),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                    }
+                }
+            ).then((response) => response.ok ?
+                    response.json() :
+                    Promise.reject(new Error(response.statusText || "Unknown error."))
+            ).catch((error) => console.error(error.message));
+        }
+
+        return await fetch(`${API}/presentmd/${existing.data[0].id}`,
+            {
+                method: "PUT",
                 body: JSON.stringify(body),
                 headers: {
                     "Content-Type": "application/json",
@@ -132,11 +161,9 @@ function Editor() {
                 response.json() :
                 Promise.reject(new Error(response.statusText || "Unknown error."))
         ).catch((error) => console.error(error.message));
-
     }
 
     async function save() {
-        console.log("saving cunt");
         postPMD();
     }
 

@@ -2,11 +2,11 @@ import { useState } from "react";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import rehypePrism from "rehype-prism-plus";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-
 import { Button } from "@/components/ui/button";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";
+import { customAlphabet } from "nanoid";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -35,11 +35,47 @@ type Slide = {
     content: object[]
 }
 
+const API = "https://comp2140-3ea651da.uqcloud.net/api";
+const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
+const CODE_LENGTH = 8;
+
+/**
+ * Returns a unique code that can be used to load this presentation in the future.
+ * Queries the API to check if the code is already used, and if so then generates another one.
+ * Global constants CODE_ALPHABET and CODE_LENGTH decide the alphabet and length of the code,
+ * respectively.
+ *
+ * @return A unique code for this presentation.
+ */
+async function codeGenerator() {
+    const code = customAlphabet(CODE_ALPHABET, CODE_LENGTH)();
+    const response = await fetch(`${API}/presentmd?code=${code}`,
+        {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+            }
+        }
+    )
+        .then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText || "Unknown error.")))
+        .catch((error) => console.error(error.message));
+
+    if (response.total == 0) {
+        return code;
+    }
+
+    return codeGenerator();
+}
+
 
 function Editor() {
     const [md, setmd] = useState<string>(PLACEHOLDER_PMD);
+    const [code, setcode] = useState<string>();
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
     const [isPublic, setpublic] = useState<boolean>(false);
+
 
     async function updatePreview(presentmd: string) {
         setmd(presentmd);
@@ -51,12 +87,14 @@ function Editor() {
     }
 
     async function postPMD() {
-        return await fetch("https://comp2140-3ea651da.uqcloud.net/api/presentmd",
+        const body = { code: await codeGenerator(), contents: md };
+        return await fetch(`${API}/presentmd`,
             {
                 method: "POST",
-                body: md,
+                body: JSON.stringify(body),
                 headers: {
-                    Authorization: `Bearer ${import.meta.env.API_KEY}`,
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
                 }
             }
         ).then((response) => response.ok ?
@@ -68,7 +106,7 @@ function Editor() {
 
     async function save() {
         console.log("saving cunt");
-        console.log(postPMD());
+        postPMD();
     }
 
     return (
@@ -100,7 +138,7 @@ function Editor() {
                             checked={isPublic} onChange={togglePublic}/>
                         <label>Public</label>
                     </div>
-                </AspectRatio></Col>
+                    </AspectRatio></Col>
                 <Col lg>
                     <DeckPreviewer deck={model}/>
                 </Col>

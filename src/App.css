@@ -26,34 +26,34 @@ header {
     color: var(--foreground);
 }
 
-#viewer {
+.viewer {
     container-type: inline-size;
 }
 
-#viewer h1 {
+.viewer h1 {
     font-size: 4cqi;
 }
 
-#viewer h3 {
+.viewer h3 {
     font-size: 3cqi;
 }
 
-#viewer p {
+.viewer p {
     font-size: 2cqi;
 }
 
-#viewer li {
+.viewer li {
     font-size: 2cqi;
 }
 
-#viewer ol li {
+.viewer ol li {
     list-style: decimal;
 }
 
-#viewer ul li {
+.viewer ul li {
     list-style: outside;
 }
 
-#viewer .quote {
+.viewer .quote {
     margin-left: 2cqi;
 }

@@ -169,8 +169,7 @@ function DeckPreviewer(props: { deck: Deck }) {
 
     return (<>
         <AspectRatio ratio={16/9}>
-            <div className="w-full h-full overflow-hidden border border-dark rounded p-2"
-                 id="viewer">
+            <div className="w-full h-full overflow-hidden border border-dark rounded p-2 viewer">
                 {preview[slideNo - 1]}
             </div>
         </AspectRatio>

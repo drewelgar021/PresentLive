@@ -3,6 +3,8 @@ import CodeEditor from "@uiw/react-textarea-code-editor";
 import rehypePrism from "rehype-prism-plus";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Field } from "@/components/ui/field";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";
@@ -72,6 +74,8 @@ async function codeGenerator() {
 
 function Editor() {
     const [md, setmd] = useState<string>(PLACEHOLDER_PMD);
+    const [loadCode, setloadCode] = useState<string>("");
+    const [invalidLoad, setinvalidLoad] = useState<boolean>(false);
     const [code, setcode] = useState<string>();
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
     const [isPublic, setpublic] = useState<boolean>(false);
@@ -86,8 +90,35 @@ function Editor() {
         setpublic(!isPublic);
     }
 
+    async function getPMD() {
+        console.log(invalidLoad);
+        const response = await fetch(`${API}/presentmd?code=${loadCode}`,
+        {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+            }
+        })
+        .then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText || "Unknown error.")))
+        .catch((error) => console.error(error.message));
+
+        if (response.total == 0) {
+            setinvalidLoad(true);
+        } else {
+            setinvalidLoad(false);
+            setmd(response.data[0].contents);
+            setcode(loadCode);
+        }
+
+    }
+
     async function postPMD() {
-        const body = { code: await codeGenerator(), contents: md };
+        if (!code) {
+            setcode(await codeGenerator())
+        }
+        const body = { code: code, contents: md };
         return await fetch(`${API}/presentmd`,
             {
                 method: "POST",
@@ -130,13 +161,30 @@ function Editor() {
                             fontSize: 16
                         }}
                     />
-                    <div className="d-flex align-items-center">
+
+                    <div className="d-flex align-items-center mt-2">
                         <Button className="mx-2 rounded" variant="outline" onClick={save}>
                             Save/Share
                         </Button>
                         <input type="checkbox" className="mx-2"
                             checked={isPublic} onChange={togglePublic}/>
                         <label>Public</label>
+                    </div>
+
+                    <div className="d-flex align-items-center mt-2">
+                        <Field style={{maxWidth: "100px"}} data-invalid={invalidLoad}
+                            className="mx-2">
+                            <Input style={{maxWidth: "100px"}} className="rounded"
+                                placeholder="Code"
+                                onChange={(e) => {
+                                    setloadCode(e.target.value);
+                                    setinvalidLoad(false);
+                                }}
+                                aria-invalid />
+                        </Field>
+                        <Button className="rounded" variant="outline" onClick={getPMD}>
+                            Load
+                        </Button>
                     </div>
                     </AspectRatio></Col>
                 <Col lg>

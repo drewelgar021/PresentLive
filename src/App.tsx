@@ -24,7 +24,6 @@ function Header() {
                             className={location.pathname == navLink.name ?
                                 "nav-link active" : "nav-link"}
                             to={navLink.path}>
-
                         {navLink.name}
 
                     </NavLink></li>
@@ -36,8 +35,8 @@ function Header() {
 
 
 function App() {
-    return (
-        <Router><div className="App">
+    return (<>
+        <Router><div className="App" data-bs-theme="dark">
             <Header/>
             <Routes>
                 <Route index path="editor" element={<Editor/>} />
@@ -45,7 +44,7 @@ function App() {
                 <Route path="/" element={<Navigate to="editor"/>}/>
             </Routes>
         </div></Router>
-    );
+    </>);
 }
 
 

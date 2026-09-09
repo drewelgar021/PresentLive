@@ -36,6 +36,12 @@ type Slide = {
     draft?: null,
     content: object[]
 }
+ 
+type Alert = {
+    hidden: boolean,
+    type: string,
+    message: React.JSX.Element
+}
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -81,6 +87,7 @@ function Editor() {
     const [code, setcode] = useState<string>();
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
     const [isPublic, setpublic] = useState<boolean>(false);
+    const [alert, setAlert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
 
 
     async function updatePreview(presentmd: string) {
@@ -92,6 +99,11 @@ function Editor() {
         setpublic(!isPublic);
     }
 
+
+    /**
+     * Loads a presentation from the API into the editor given the loadCode in state.
+     * Sets the state variable invalidLoad if the load was not successful.
+     */
     async function getPMD() {
         console.log(invalidLoad);
         const response = await fetch(`${API}/presentmd?code=${loadCode}`,
@@ -116,10 +128,18 @@ function Editor() {
 
     }
 
+    /**
+     * Sends a PUT or POST request to API/presentmd to store the current presentation.
+     * If a presentation with the same code already exists, PUTs the new one.
+     * Otherwise POSTs with a new, randomly generated code.
+     * If a new code is generated, the code is also updated in state.
+     *
+     * @return True if the presentation is saved successfully, or false otherwise.
+     */
     async function postPMD() {
         const newCode = code ?? await codeGenerator();
         if (!newCode) {
-            return false;
+            return null;
         }
         if (newCode != code) {
             setcode(newCode);
@@ -138,7 +158,7 @@ function Editor() {
                 Promise.reject(new Error(response.statusText ?? "Unknown error.")))
             .catch((error) => {console.error(error.message)});
 
-        if (!existing) return false;
+        if (!existing) return null;
 
         if (existing.total == 0) {
             return await fetch(`${API}/presentmd`,
@@ -151,9 +171,9 @@ function Editor() {
                     }
                 }
             ).then((response) => response.ok ?
-                    true :
+                    newCode :
                     Promise.reject(new Error(response.statusText || "Unknown error."))
-            ).catch((error) => {console.error(error.message); return false});
+            ).catch((error) => {console.error(error.message); return null});
         }
 
         return await fetch(`${API}/presentmd/${existing.data[0].id}`,
@@ -166,13 +186,33 @@ function Editor() {
                 }
             }
         ).then((response) => response.ok ?
-                true :
+                newCode :
                 Promise.reject(new Error(response.statusText || "Unknown error."))
-        ).catch((error) => {console.error(error.message); return false});
+        ).catch((error) => {console.error(error.message); return null});
     }
 
+
+    /**
+     * Saves the current presentation to the API.
+     */
     async function save() {
-        console.log(await postPMD());
+        const newCode = await postPMD();
+        if (newCode) {
+            setAlert({ hidden: false, type: "success",
+                message: <>
+                    Presentation saved successfully!<br/>
+                    Use code <b>{newCode}</b> to pick up where you left off, or share with
+                    collaborators.
+                </>
+            }
+        )} else {
+            setAlert({ hidden: false, type: "danger",
+                message: <>
+                    <b>Error:</b> Could not save presentation.<br/>
+                    Please check API status.
+                </>
+            });
+        }
     }
 
     return (
@@ -214,12 +254,16 @@ function Editor() {
                                 onChange={(e) => {
                                     setloadCode(e.target.value);
                                     setinvalidLoad(false);
-                                }}
-                                aria-invalid />
+                                }} aria-invalid={invalidLoad} />
                         </Field>
                         <Button className="rounded" variant="outline" onClick={getPMD}>
                             Load
                         </Button>
+                    </div>
+                    <div className="d-flex align-otems-center mt-2">
+                        <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
+                            {alert.message}
+                        </div>
                     </div>
                     </AspectRatio></Col>
                 <Col lg>

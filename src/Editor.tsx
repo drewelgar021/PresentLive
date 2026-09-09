@@ -120,10 +120,21 @@ function Editor() {
 
         if (response.total == 0) {
             setinvalidLoad(true);
+            setAlert({ hidden: false, type: "danger",
+                message: <>
+                    <b>Error:</b> No presentation corresponding to provided code.
+                </>
+            });
+
         } else {
             setinvalidLoad(false);
             setmd(response.data[0].contents);
             setcode(loadCode);
+            setAlert({ hidden: false, type: "success",
+                message: <>
+                    Presentation loaded successfully!
+                </>
+            })
         }
 
     }

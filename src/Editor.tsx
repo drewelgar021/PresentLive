@@ -64,6 +64,8 @@ async function codeGenerator() {
             Promise.reject(new Error(response.statusText ?? "Unknown error.")))
         .catch((error) => console.error(error.message));
 
+    if (!response) return null;
+
     if (response.total == 0) {
         return code;
     }
@@ -115,12 +117,16 @@ function Editor() {
     }
 
     async function postPMD() {
-        if (!code) {
-            setcode(await codeGenerator())
+        const newCode = code ?? await codeGenerator();
+        if (!newCode) {
+            return false;
         }
-        const body = { code: code, contents: md };
+        if (newCode != code) {
+            setcode(newCode);
+        }
+        const body = { code: newCode, contents: md };
 
-        const existing = await fetch (`${API}/presentmd?code=${code}`,
+        const existing = await fetch (`${API}/presentmd?code=${newCode}`,
             {
                 method: "GET",
                 headers: {
@@ -130,7 +136,9 @@ function Editor() {
             .then((response) => response.ok ?
                 response.json() :
                 Promise.reject(new Error(response.statusText ?? "Unknown error.")))
-            .catch((error) => console.error(error.message));
+            .catch((error) => {console.error(error.message)});
+
+        if (!existing) return false;
 
         if (existing.total == 0) {
             return await fetch(`${API}/presentmd`,
@@ -143,9 +151,9 @@ function Editor() {
                     }
                 }
             ).then((response) => response.ok ?
-                    response.json() :
+                    true :
                     Promise.reject(new Error(response.statusText || "Unknown error."))
-            ).catch((error) => console.error(error.message));
+            ).catch((error) => {console.error(error.message); return false});
         }
 
         return await fetch(`${API}/presentmd/${existing.data[0].id}`,
@@ -158,13 +166,13 @@ function Editor() {
                 }
             }
         ).then((response) => response.ok ?
-                response.json() :
+                true :
                 Promise.reject(new Error(response.statusText || "Unknown error."))
-        ).catch((error) => console.error(error.message));
+        ).catch((error) => {console.error(error.message); return false});
     }
 
     async function save() {
-        postPMD();
+        console.log(await postPMD());
     }
 
     return (

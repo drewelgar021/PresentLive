@@ -251,7 +251,7 @@ function Editor() {
                             className="mx-2">
                             <Input style={{maxWidth: "100px"}} className="rounded"
                                 placeholder="Code"
-                                onChange={(e) => {
+                                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setloadCode(e.target.value);
                                     setinvalidLoad(false);
                                 }} aria-invalid={invalidLoad} />

@@ -226,10 +226,23 @@ function Editor() {
         }
     }
 
+    function newPresentation() {
+        setcode(undefined);
+        setmd(PLACEHOLDER_PMD);
+        setloadCode("");
+        setinvalidLoad(false);
+        setmodel(presentMDToModel(PLACEHOLDER_PMD));
+        setpublic(false);
+        setAlert({ hidden: false, type: "success", message: <>New presentation created successfully</>})
+    }
+
     return (
         <div className="m-2">
             <Row>
                 <Col lg className="h-auto"><AspectRatio ratio={4/3}>
+                    <Button className="rounded m-2" variant="outline" onClick={newPresentation}>
+                        New Presentation
+                    </Button>
                     <CodeEditor
                         language="md"
                         placeholder="Write PresentMD here"

@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
+import { customAlphabet } from "nanoid";
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";
-import { customAlphabet } from "nanoid";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -88,6 +88,7 @@ function Editor() {
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
     const [isPublic, setpublic] = useState<boolean>(false);
     const [alert, setAlert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
+    const [prompt, setprompt] = useState<string>();
 
 
     async function updatePreview(presentmd: string) {
@@ -233,7 +234,18 @@ function Editor() {
         setinvalidLoad(false);
         setmodel(presentMDToModel(PLACEHOLDER_PMD));
         setpublic(false);
-        setAlert({ hidden: false, type: "success", message: <>New presentation created successfully</>})
+        setAlert({ hidden: false, type: "success",
+                    message: <>New presentation created successfully</>})
+    }
+
+    function generate() {
+        if (prompt) {
+            console.log("will prompt");
+        } else {
+            setAlert(
+                { hidden: false, type: "danger",
+                    message: <>Please provide a topic to generate.</>});
+        }
     }
 
     return (
@@ -271,9 +283,9 @@ function Editor() {
                     </div>
 
                     <div className="d-flex align-items-center mt-2">
-                        <Field style={{maxWidth: "100px"}} data-invalid={invalidLoad}
+                        <Field style={{ maxWidth: "100px" }} data-invalid={invalidLoad}
                             className="mx-2">
-                            <Input style={{maxWidth: "100px"}} className="rounded"
+                            <Input style={{ maxWidth: "100px" }} className="rounded"
                                 placeholder="Code"
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setloadCode(e.target.value);
@@ -284,6 +296,17 @@ function Editor() {
                             Load
                         </Button>
                     </div>
+                    <div className="d-flex align-items-center mt-2">
+                        <Field style={{ maxWidth: "300px" }} className="mx-2">
+                            <Input style={{ maxWidth: "300px" }} className="rounded"
+                                placeholder="Write me a presentation about..."
+                                onChange={(e) => setprompt(e.target.value)} />
+                        </Field>
+                        <Button className="rounded" variant="outline" onClick={generate}>
+                            Generate
+                        </Button>
+                    </div>
+
                     <div className="d-flex align-otems-center mt-2">
                         <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
                             {alert.message}

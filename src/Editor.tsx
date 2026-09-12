@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Field } from "@/components/ui/field";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { customAlphabet } from "nanoid";
+import { z } from "zod"
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 
@@ -46,6 +47,30 @@ type Alert = {
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
 const CODE_LENGTH = 8;
+
+const modelResponseSchema = z.object({ pmd: z.string() });
+
+async function fetchLLMPresentation(topic: string) {
+    const data = await fetch("http://localhost:3001/api/generate-presentation", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic })
+    }).then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText || "Unknown error."))
+    ).catch((error) => {console.error(error.message); return null})
+
+    if (!data) {
+        return null;
+    }
+
+    const parsed = modelResponseSchema.safeParse(data);
+    if (!parsed.success) {
+        console.log("Error: Response did not match expected schema.")
+        return null;
+    }
+    return parsed.data.pmd;
+}
 
 /**
  * Returns a unique code that can be used to load this presentation in the future.
@@ -89,6 +114,7 @@ function Editor() {
     const [isPublic, setpublic] = useState<boolean>(false);
     const [alert, setAlert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
     const [prompt, setprompt] = useState<string>();
+    const [isGenerating, setisGenerating] = useState<boolean>(false);
 
 
     async function updatePreview(presentmd: string) {
@@ -227,32 +253,44 @@ function Editor() {
         }
     }
 
-    function newPresentation() {
+    function newPresentation(md: string = PLACEHOLDER_PMD) {
         setcode(undefined);
-        setmd(PLACEHOLDER_PMD);
+        setmd(md);
         setloadCode("");
         setinvalidLoad(false);
-        setmodel(presentMDToModel(PLACEHOLDER_PMD));
+        setmodel(presentMDToModel(md));
         setpublic(false);
         setAlert({ hidden: false, type: "success",
-                    message: <>New presentation created successfully</>})
+                    message: <>New presentation created successfully</> })
     }
 
-    function generate() {
-        if (prompt) {
-            console.log("will prompt");
+
+    async function generate() {
+        setisGenerating(true);
+        if (prompt && prompt.trim().length > 0) {
+            const response = await fetchLLMPresentation(prompt);
+            if (!response) {
+                setAlert({ hidden: false, type: "danger",
+                    message: <><b>Error:</b> Unable to obtain response from the AI model.</> });
+            } else {
+                newPresentation();
+                setmd(response);
+                setmodel(presentMDToModel(response));
+                setAlert({ hidden: false, type: "success",
+                    message: <>Presentation generated successfully!</> })
+            }
         } else {
-            setAlert(
-                { hidden: false, type: "danger",
+            setAlert({ hidden: false, type: "danger",
                     message: <>Please provide a topic to generate.</>});
         }
+        setisGenerating(false);
     }
 
     return (
         <div className="m-2">
             <Row>
                 <Col lg className="h-auto"><AspectRatio ratio={4/3}>
-                    <Button className="rounded m-2" variant="outline" onClick={newPresentation}>
+                    <Button className="rounded m-2" variant="outline" onClick={() => newPresentation()}>
                         New Presentation
                     </Button>
                     <CodeEditor
@@ -303,6 +341,7 @@ function Editor() {
                                 onChange={(e) => setprompt(e.target.value)} />
                         </Field>
                         <Button className="rounded" variant="outline" onClick={generate}>
+                            { isGenerating && <div className="spinner-grow" />}
                             Generate
                         </Button>
                     </div>

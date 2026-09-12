@@ -50,15 +50,8 @@ type PresentMD = {
     contents: string
 }
 
-type Public = {
-    id: string,
-    private_code: string,
-    public_code: string
-}
-
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
-const CODE_LENGTH = 8;
 
 const modelResponseSchema = z.object({ pmd: z.string() });
 
@@ -93,7 +86,7 @@ async function fetchLLMPresentation(topic: string) {
  * @return A unique code for this presentation.
  */
 async function codeGenerator() {
-    const code = customAlphabet(CODE_ALPHABET, CODE_LENGTH)();
+    const code = customAlphabet(CODE_ALPHABET, 8)();
     const response = await fetch(`${API}/presentmd?code=${code}`,
         {
             method: "GET",
@@ -116,12 +109,46 @@ async function codeGenerator() {
     return codeGenerator();
 }
 
+/**
+ * Returns a unique code that can be used to load this presentation in the future.
+ * Queries the API to check if the code is already used, and if so then generates another one.
+ * Global constants CODE_ALPHABET and CODE_LENGTH decide the alphabet and length of the code,
+ * respectively.
+ *
+ * @return A unique code for this presentation.
+ */
+async function publicCodeGenerator() {
+    const code = customAlphabet(CODE_ALPHABET, 6)();
+    const response = await fetch(`${API}/public?public_code=${code}`,
+        {
+            method: "GET",
+            headers: {
+                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+            }
+        }
+    )
+        .then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+        .catch((error) => console.error(error.message));
+
+    if (!response) return undefined;
+
+    if (response.total == 0) {
+        return "w-" + code;
+    }
+
+    return publicCodeGenerator();
+}
+
+
 
 function Editor() {
     const [md, setmd] = useState<string>(PLACEHOLDER_PMD);
     const [loadCode, setloadCode] = useState<string>("");
     const [invalidLoad, setinvalidLoad] = useState<boolean>(false);
     const [code, setcode] = useState<string>();
+    const [publicCode, setpublicCode] = useState<string>();
     const [model, setmodel] = useState<Deck>(presentMDToModel(PLACEHOLDER_PMD));
     const [isPublic, setpublic] = useState<boolean>(false);
     const [alert, setAlert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
@@ -169,6 +196,8 @@ function Editor() {
             setmd(response.data[0].contents);
             setmodel(presentMDToModel(response.data[0].contents));
             setcode(loadCode);
+            setpublicCode(response.data[0].public_code);
+            setpublic(response.data[0].public_code ? true : false);
             setAlert({ hidden: false, type: "success",
                 message: <>
                     Presentation loaded successfully!
@@ -215,14 +244,78 @@ function Editor() {
     }
 
     /**
+     * Sends a PUT or POST request to API/public to store a public presentation.
+     * If a presentation with the same public code already exists, PUTs the new one.
+     * Otherwise POSTs with a new, randomly generated code.
+     * If a new code is generated, then the public code is also updated in state.
+     *
+     * @return The uniquely generated public code that can be used to watch a presentation without
+     *         editing, or null if an error occurs.
+     */
+    async function postPublic(publicCode: string | undefined) {
+        if (!publicCode) {
+            return null;
+        }
+        const body = { public_code: publicCode, model: model }
+
+        const existing = await fetch (`${API}/public?public_code=${publicCode}`,
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                }
+            })
+            .then((response) => response.ok ?
+                response.json() :
+                Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+            .catch((error) => {console.error(error.message)});
+
+        if (!existing) {
+            return null;
+        }
+
+        if (existing.total == 0) {
+            return await fetch(`${API}/public`,
+                {
+                    method: "POST",
+                    body: JSON.stringify(body),
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                    }
+                }
+            ).then((response) => response.ok ?
+                    publicCode :
+                    Promise.reject(new Error(response.statusText || "Unknown error."))
+            ).catch((error) => {console.error(error.message); return null});
+        }
+
+        return await fetch(`${API}/public/${existing.data[0].id}`,
+            {
+                method: "PUT",
+                body: JSON.stringify(body),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                }
+            }
+        ).then((response) => response.ok ?
+                publicCode :
+                Promise.reject(new Error(response.statusText || "Unknown error."))
+        ).catch((error) => {console.error(error.message); return null});
+
+    }
+
+    /**
      * Sends a PUT or POST request to API/presentmd to store the current presentation.
      * If a presentation with the same code already exists, PUTs the new one.
      * Otherwise POSTs with a new, randomly generated code.
      * If a new code is generated, the code is also updated in state.
      *
-     * @return The HTTP response from the API.
+     * @return The uniquely generated presentation code that can be used to load the saved
+     *         presentation into the editor.
      * */
-    async function postPMD() {
+    async function postPMD(publicCode: string | undefined) {
         const newCode = code ?? await codeGenerator();
         if (!newCode) {
             return null;
@@ -230,7 +323,7 @@ function Editor() {
         if (newCode != code) {
             setcode(newCode);
         }
-        const body = { code: newCode, contents: md };
+        const body = { code: newCode, contents: md, public_code: publicCode };
 
         const existing = await fetch (`${API}/presentmd?code=${newCode}`,
             {
@@ -282,13 +375,24 @@ function Editor() {
      * Saves the current presentation to the API.
      */
     async function save() {
-        const newCode = await postPMD();
-        if (newCode) {
+        const newPublicCode = isPublic ?
+            await postPublic(((publicCode ?? await publicCodeGenerator()))) : undefined;
+        if (newPublicCode) {
+            setpublicCode(newPublicCode);
+        }
+
+        const newCode = await postPMD(newPublicCode ?? undefined);
+
+        if (newCode && (!isPublic || newPublicCode)) {
             setAlert({ hidden: false, type: "success",
                 message: <>
                     Presentation saved successfully!<br/>
                     Use code <b>{newCode}</b> to pick up where you left off, or share with
                     collaborators.
+                    {newPublicCode &&
+                        <><br/>Share code <b>{newPublicCode}</b> with viewers to use in the "Watch"
+                            tab.</>
+                    }
                 </>
             }
         )} else {
@@ -383,7 +487,7 @@ function Editor() {
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                                     setloadCode(e.target.value);
                                     setinvalidLoad(false);
-                                }} aria-invalid={invalidLoad} />
+                                }} aria-invalid={invalidLoad} value={loadCode} />
                         </Field>
                         <Button className="rounded" variant="outline" onClick={getPMD}>
                             Load

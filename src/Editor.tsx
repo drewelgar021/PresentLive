@@ -167,6 +167,7 @@ function Editor() {
         } else {
             setinvalidLoad(false);
             setmd(response.data[0].contents);
+            setmodel(presentMDToModel(response.data[0].contents));
             setcode(loadCode);
             setAlert({ hidden: false, type: "success",
                 message: <>

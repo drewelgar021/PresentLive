@@ -44,6 +44,18 @@ type Alert = {
     message: React.JSX.Element
 }
 
+type PresentMD = {
+    id: string,
+    code: string,
+    contents: string
+}
+
+type Public = {
+    id: string,
+    private_code: string,
+    public_code: string
+}
+
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
 const CODE_LENGTH = 8;
@@ -132,7 +144,6 @@ function Editor() {
      * Sets the state variable invalidLoad if the load was not successful.
      */
     async function getPMD() {
-        console.log(invalidLoad);
         const response = await fetch(`${API}/presentmd?code=${loadCode}`,
         {
             method: "GET",
@@ -163,7 +174,43 @@ function Editor() {
                 </>
             })
         }
+    }
 
+
+    async function deletePrivate(id: string) {
+        await fetch(`${API}/presentmd/${id}`,
+            {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+        })
+        .then((response) => response.ok ? {}
+            : Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+        .catch((error) => console.error(error.message));
+    }
+
+    /**
+     * Deletes all presentations from the API having the same private code as the one currently
+     * loaded.
+     */
+    async function deletePresentation() {
+        const target = await fetch (`${API}/presentmd?code=${code}`,
+            {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+        })
+        .then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+        .catch((error) => console.error(error.message));
+        if (!target) {
+            setAlert({ hidden: false, type: "danger",
+                message: <><b>Error:</b> Could not connect to API.</> });
+            return;
+        }
+        target.data.forEach((record: PresentMD) => deletePrivate(record.id));
+        newPresentation();
+        setAlert({ hidden: false, type: "success",
+            message: <>Presentation deleted.</>})
     }
 
     /**
@@ -172,8 +219,8 @@ function Editor() {
      * Otherwise POSTs with a new, randomly generated code.
      * If a new code is generated, the code is also updated in state.
      *
-     * @return True if the presentation is saved successfully, or false otherwise.
-     */
+     * @return The HTTP response from the API.
+     * */
     async function postPMD() {
         const newCode = code ?? await codeGenerator();
         if (!newCode) {
@@ -290,7 +337,8 @@ function Editor() {
         <div className="m-2">
             <Row>
                 <Col lg className="h-auto"><AspectRatio ratio={4/3}>
-                    <Button className="rounded m-2" variant="outline" onClick={() => newPresentation()}>
+                    <Button className="rounded m-2" variant="outline"
+                            onClick={() => newPresentation()}>
                         New Presentation
                     </Button>
                     <CodeEditor
@@ -318,6 +366,12 @@ function Editor() {
                         <input type="checkbox" className="mx-2"
                             checked={isPublic} onChange={togglePublic}/>
                         <label>Public</label>
+                        { code &&
+                            <Button className="mx-2 rounded" variant="outline"
+                                    onClick={deletePresentation}>
+                                Delete
+                            </Button>
+                        }
                     </div>
 
                     <div className="d-flex align-items-center mt-2">

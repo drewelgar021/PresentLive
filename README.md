@@ -30,11 +30,6 @@ The environment variable `AI_API_KEY` must be set to a valid API key.
 Any features that use the API must have environment variable `VITE_API_KEY` set to a valid API key,
 or the API will respond with a `401`.
 
-1. Navigate to the "Editor" tab in the navbar at the top of the page (which is loaded by default).
-2. Edit the presentation contents in PresentMD using the text field on the left.
-   The preview will update with changes in real time on the right.
-3. Use the GUI controls, explained below, to save, load, delete, etc.
-
 ### GUI Controls
 ![Editor GUI](/img/editor.png "Editor GUI")
 
@@ -54,6 +49,26 @@ or the API will respond with a `401`.
 - "Generate" uses the AI assistant to generate a new presentation about the provided topic.
 - The arrow icons below the preview window change the slide being shown in the preview.
   The current slide number is displayed between them.
+
+### Workflow
+1. Navigate to the "Edit" tab in the navbar at the top of the page (which is loaded by default).
+2. Use the text area on the left to edit the contents of the slide with PresentMD, and notice that
+   the preview on the right updates in real time.
+3. Add a new slide by using a separator `---`, and write more contents below it.
+   Now you can navigate between slides using the arrow buttons below the previewer.
+4. Click "Save/Share" to save it to the API.
+   Keep the code it shows you so that you can load it again later.
+5. Click "New Presentation" to start fresh.
+6. Type the presentation code from before into the text input that says "Code".
+   Now click the "Load" button to restore the presentation that you had before.
+7. Click the "Delete" button, then try to load the same presentation from before.
+   Notice that it no longer exists.
+8. Type a topic into the "Write me a presentation about..." text input and click "Generate".
+   After it loads, the editor and preview will show an AI generated presentation about the provided
+   topic.
+9. Save the presentation after checking the "Public" box.
+   There is now an additional public code.
+   Save this for later to test the presentation watcher.
 
 ## Satisfaction of Functionality Requirements
 

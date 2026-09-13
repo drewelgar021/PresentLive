@@ -14,6 +14,8 @@ import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
+import type { Deck, Alert, PresentMD } from "./types"
+
 const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
                       + "author: Me\n"
@@ -21,34 +23,6 @@ const PLACEHOLDER_PMD = "---\n"
                       + "<!-- layout: title -->\n\n"
                       + "# Welcome to PresentLive!\n\n"
                       + "Start writing your presentation here.\n"
-
-type Deck = {
-    title?: string,
-    author?: string,
-    backgroundColor?: string,
-    color?: string,
-    layout?: string,
-    slides: Slide[]
-}
-
-type Slide = {
-    display?: string,
-    backgroundColor?: string,
-    draft?: null,
-    content: object[]
-}
- 
-type Alert = {
-    hidden: boolean,
-    type: string,
-    message: React.JSX.Element
-}
-
-type PresentMD = {
-    id: string,
-    code: string,
-    contents: string
-}
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
@@ -520,22 +494,22 @@ function Editor() {
 }
 
 function DeckPreviewer(props: { deck: Deck }) {
-    const [slideNo, setSlideNo] = useState<number>(1);
+    const [slideNo, setslideNo] = useState<number>(1);
     const preview = presentMDToJSX(props.deck);
 
     if (slideNo > props.deck.slides.length) {
-        setSlideNo(props.deck.slides.length);
+        setslideNo(props.deck.slides.length);
     }
 
     function decrementPage() {
         if (slideNo > 1) {
-            setSlideNo(slideNo - 1);
+            setslideNo(slideNo - 1);
         }
     }
 
     function incrementPage() {
         if (slideNo < props.deck.slides.length) {
-            setSlideNo(slideNo + 1);
+            setslideNo(slideNo + 1);
         }
     }
 

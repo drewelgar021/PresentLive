@@ -1,5 +1,11 @@
 function Viewer() {
-    return <p>This is the viewer</p>;
+    const [slideNo, setslideNo] = useState<number>(1);
+    const [model, setmodel] = useState();
+    return (
+        <div className="m-2">
+
+        </div>
+    );
 }
 
 export default Viewer;

@@ -20,7 +20,9 @@ This **must** be run from the root project directory to work as expected.
 ## AI Assistant Setup
 The server handles cross-origin requests between the web app and the API's LLM interface.
 The AI assistant will only work if the server is running on localhost, port `3001` (which it should
-since this is hardcoded into the server).
+since this is hardcoded into the server), and if the web app is running on port `5173` (which is the
+default for Vite, unless something else is already using this port).
+
 The web app sends a POST request to the server, then the server sends a POST request to the LLM API.
 
 The environment variable `AI_API_KEY` must be set to a valid API key.

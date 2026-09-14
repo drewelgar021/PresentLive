@@ -9,8 +9,8 @@ import Viewer from "./Viewer";
 import Row from "react-bootstrap/Row"
 
 const navLinks = [
-    {name: "Edit", path: "editor"},
-    {name: "Watch", path: "viewer"}
+    {name: "Edit", path: "edit"},
+    {name: "Watch", path: "watch"}
 ];
 
 function Header() {
@@ -39,9 +39,9 @@ function App() {
         <Router><div className="App" data-bs-theme="dark">
             <Header/>
             <Routes>
-                <Route index path="editor" element={<Editor/>} />
-                <Route path="viewer" element={<Viewer/>} />
-                <Route path="/" element={<Navigate to="editor"/>}/>
+                <Route index path="edit" element={<Editor/>} />
+                <Route path="watch" element={<Viewer/>} />
+                <Route path="/" element={<Navigate to="edit"/>}/>
             </Routes>
         </div></Router>
     </>);

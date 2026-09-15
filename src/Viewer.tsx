@@ -42,6 +42,23 @@ function Viewer() {
         }
 
         setmodel(response.data[0].model);
+
+        const body = { viewers: [...response.data[0].viewers,
+                                    { name: displayName, datetime: Date.now()}] }
+        await fetch(`${API}/public/${response.data[0].id}`,
+            {
+                method: "PATCH",
+                body: JSON.stringify(body),
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                }
+            }
+        ).then((response) => response.ok ?
+            response.json :
+            Promise.reject(new Error(response.statusText || "Unknown error."))
+        ).catch((error) => console.error(error.message));
+
         return true;
     }
 

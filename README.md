@@ -68,7 +68,15 @@ or the API will respond with a `401`.
 8. Type a topic into the "Write me a presentation about..." text input and click "Generate".
    After it loads, the editor and preview will show an AI generated presentation about the provided
    topic.
-9. Save the presentation after checking the "Public" box.
+9. Add a poll somewhere in the presentation using the syntax below.
+   The square brackets and quotation marks are required for options, which will be parsed as a JSON
+   array.
+```md
+<!-- poll: <title> -->
+
+<!-- options: ["<option 1>", ...] -->
+```
+10. Save the presentation after checking the "Public" box.
    There is now an additional public code.
    Save this for later to test the presentation watcher.
 
@@ -114,7 +122,8 @@ or the API will respond with a `401`.
 
 ### User Stories / Workflows
 - Presentation editor
-  - Creates and edits presentations, views poll results.
+  - Creates and edits presentations.
+  - Views analytics, including poll responses and attendance.
 - Presentation viewer
   - Views presentations and participates in polls.
   - This workflow is a guided multi-step flow: viewers are prompted to enter their name, then

@@ -269,7 +269,7 @@ function Editor() {
         if (!publicCode) {
             return null;
         }
-        const body = { public_code: publicCode, model: model, viewers: [] }
+        const body = { public_code: publicCode, model: model, viewers: [], polls: []}
 
         const existing = await fetch (`${API}/public?public_code=${publicCode}`,
             {

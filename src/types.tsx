@@ -26,3 +26,9 @@ export type PresentMD = {
     contents: string
 }
 
+export type Public = {
+    id: string,
+    public_code: string
+    model: string,
+    viewers: string
+}

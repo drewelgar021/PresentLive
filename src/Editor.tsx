@@ -14,7 +14,7 @@ import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
-import type { Deck, Alert, PresentMD } from "./types"
+import type { Deck, Alert, PresentMD, Public } from "./types"
 
 const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
@@ -180,9 +180,31 @@ function Editor() {
         }
     }
 
-
+    /**
+     * Deletes a presentation from the API's presentmd entity.
+     *
+     * @param id - The id of the record to be deleted.
+     *             This is the uuid automatically assigned by the API, not the code.
+     */
     async function deletePrivate(id: string) {
         await fetch(`${API}/presentmd/${id}`,
+            {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+        })
+        .then((response) => response.ok ? {}
+            : Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+        .catch((error) => console.error(error.message));
+    }
+
+    /**
+     * Deletes a presentation from the API's public entity.
+     *
+     * @param id - The id of the record to be deleted.
+     *             This is the uuid automatically assigned by the API, not the public_code.
+     */
+    async function deletePublic(id: string) {
+        await fetch(`${API}/public/${id}`,
             {
                 method: "DELETE",
                 headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
@@ -197,7 +219,7 @@ function Editor() {
      * loaded.
      */
     async function deletePresentation() {
-        const target = await fetch (`${API}/presentmd?code=${code}`,
+        const privateTarget = await fetch (`${API}/presentmd?code=${code}`,
             {
                 method: "GET",
                 headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
@@ -206,12 +228,29 @@ function Editor() {
             response.json() :
             Promise.reject(new Error(response.statusText ?? "Unknown error.")))
         .catch((error) => console.error(error.message));
-        if (!target) {
+        if (!privateTarget) {
             setAlert({ hidden: false, type: "danger",
                 message: <><b>Error:</b> Could not connect to API.</> });
             return;
         }
-        target.data.forEach((record: PresentMD) => deletePrivate(record.id));
+        privateTarget.data.forEach((record: PresentMD) => deletePrivate(record.id));
+
+        const publicTarget= await fetch (`${API}/public?public_code=${publicCode}`,
+            {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+        })
+        .then((response) => response.ok ?
+            response.json() :
+            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
+        .catch((error) => console.error(error.message));
+        if (!publicTarget) {
+            setAlert({ hidden: false, type: "danger",
+                message: <><b>Error:</b> Could not connect to API.</> });
+            return;
+        }
+        publicTarget.data.forEach((record: PresentMD) => deletePublic(record.id));
+
         newPresentation();
         setAlert({ hidden: false, type: "success",
             message: <>Presentation deleted.</>})
@@ -230,7 +269,7 @@ function Editor() {
         if (!publicCode) {
             return null;
         }
-        const body = { public_code: publicCode, model: model }
+        const body = { public_code: publicCode, model: model, viewers: [] }
 
         const existing = await fetch (`${API}/public?public_code=${publicCode}`,
             {
@@ -349,14 +388,37 @@ function Editor() {
      * Saves the current presentation to the API.
      */
     async function save() {
+        // If presentation has been switched to private, delete from public entity.
+        if (!isPublic && publicCode) {
+            const codes = await fetch(`${API}/public?public_code=${publicCode}`,
+                {
+                    method: "GET",
+                    headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                }
+            ).then((response) => response.ok ?
+                response.json() :
+                Promise.reject(new Error(response.statusText || "Unknown error."))
+            ).catch((error) => {console.error(error.message); return null});
+
+            if (codes) {
+                codes.data.map((record: Public) => deletePublic(record.id));
+            }
+
+        }
+
+        // Generate a new public code if public, otherwise set to undefined.
         const newPublicCode = isPublic ?
-            await postPublic(((publicCode ?? await publicCodeGenerator()))) : undefined;
+            await postPublic(((publicCode ?? await publicCodeGenerator()))) :
+            undefined;
         if (newPublicCode) {
             setpublicCode(newPublicCode);
         }
 
+        // Post to private presentations entity and get returned code.
         const newCode = await postPMD(newPublicCode ?? undefined);
 
+        // Private post must always be successful.
+        // Public post must be successful if public.
         if (newCode && (!isPublic || newPublicCode)) {
             setAlert({ hidden: false, type: "success",
                 message: <>

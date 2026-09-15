@@ -133,3 +133,19 @@ or the API will respond with a `401`.
 
 ### Advanced Features
 - Export presentation to .fodp.
+
+## AI Usage Statement / References
+No generative AI tools were used in the completion of this assessment.
+
+The [Node.js](https://nodejs.org/api/), [React](https://react.dev/reference/react), and
+[MDN Web](https://developer.mozilla.org/en-US/docs/Web/JavaScript) documentations were used as a
+reference for function usages and definitions, and much of the code in this project was
+inspired/guided by (but not directly copied from) these sources.
+
+The week 4 applied class (fetching) code was used as a reference for how this application fetches
+data from the API.
+The week 7 applied class (AI) code was used as a reference for communication between the application
+and the API's LLM.
+
+[Bootstrap](https://getbootstrap.com/docs/5.0/) and [shadcn/ui](https://ui.shadcn.com/docs/) were
+used prominently in this project, and so were their documentations as a reference.

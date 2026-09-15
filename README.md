@@ -86,12 +86,15 @@ or the API will respond with a `401`.
 
 ### A Multi-Entity Data Structure
 - There are 3 related data entities:
-  - `presentmd`: `{ code, contents }` to store presentations.
-  - `public`: `{ public_code, private_code }` to associate public codes with presentations
-    and their polls.
-  - `poll`: `{ pollid, options, responses }` stores poll options and responses, related to a unique
-    id (private presentation code appended with poll name).
-- These data entities are all stored and retrieved via the RESTful API provided by the course.
+  - `presentmd`: `{ code, contents }` to store editable presentations.
+  - `public`: `{ public_code, model, viewers, polls }` to store publicly viewable presentations.
+  - `poll`: `{ pollid, options, responses }` stores poll options and responses.
+    - `poll` is not its own entity in the API, but instead its structure is enforced by TypeScript
+      type declarations on the frontend, before it is sent to the API.
+    - All of a presentation's `poll`s are stored in the `polls` attribute of the `public` entity.
+    - These decisions were made to simplify the logic for handling poll responses, and reduce the
+      number of API requests necessary for implementing polls.
+- These data entities are stored and retrieved via the RESTful API provided by the course.
 - Records can be added, deleted, and edited using the GUI controls in the app.
 - Text inputs are validated with alerts to display success or failure of inputs.
   Alerts use user-friendly, plain English messages while specific errors are logged in the console.
@@ -100,7 +103,7 @@ or the API will respond with a `401`.
 - All data collected is intended to be used again in the app.
   - Saved presentation -> loaded presentation
   - Public presentation -> presentation watcher
-  - Poll submissions -> poll results menu
+  - Display name, poll submissions -> presentation analytics menu
 - Summary information derived from related data is displayed.
   - Poll results displayed as graphs and individual responses with names.
   - Number of participants/viewers as well as list of names.

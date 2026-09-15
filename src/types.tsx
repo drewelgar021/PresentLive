@@ -32,3 +32,19 @@ export type Public = {
     model: string,
     viewers: string
 }
+
+export type Poll = {
+    pollid: number,
+    options: PollOption[],
+    responses: PollResponse[]
+}
+
+type PollOption = {
+    name: string,
+    selections: number
+}
+
+type PollResponse = {
+    responder: string,
+    selection: string
+}

@@ -17,6 +17,11 @@ function Viewer() {
     const [alert, setAlert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
 
 
+    /**
+     * GETs the presentation corresponding to the publicCode stored in state from the API.
+     * Upon success, sets the state variable model to the presentation's model, then returns true.
+     * Otherwise returns false, and displays an alert.
+     */
     async function getPresentation() {
         const response = await fetch(`${API}/public?public_code=${code}`,
             {
@@ -31,7 +36,8 @@ function Viewer() {
 
         if (!response) {
             setAlert({ hidden: false, type: "danger",
-                message: <><b>Error:</b> Could not fetch presentation.  Please check API status.</>})
+                message: <><b>Error:</b> Could not fetch presentation.  Please check API status.</>
+            });
             return false;
         }
 
@@ -62,6 +68,10 @@ function Viewer() {
         return true;
     }
 
+    /**
+     * Handles submission of the form containing inputs for display name and watch code.
+     * Sets the state variable `ready` to true if inputs are valid, or displays an alert otherwise.
+     */
     async function submit(e: React.SubmitEvent) {
         e.preventDefault();
         if (!code) {
@@ -90,8 +100,9 @@ function Viewer() {
                         <Row className="mt-5">
                             <div className="d-flex justify-content-center align-items-center">
                                 <label>Watch Code:</label> 
-                                <Input className="mx-2" style={{ maxWidth: "100px" }} placeholder="w-xxxxxx"
-                                    value={code} onChange={(e) => setcode(e.target.value)} />
+                                <Input className="mx-2" style={{ maxWidth: "100px" }}
+                                    placeholder="w-xxxxxx" value={code}
+                                    onChange={(e) => setcode(e.target.value)} />
                             </div>
                         </Row>
 
@@ -106,7 +117,8 @@ function Viewer() {
 
                         <Row className="mt-3">
                             <div className="d-flex justify-content-center align-items-center">
-                                <Button className="mx-2 rounded px-5" variant="outline" type="submit">
+                                <Button className="mx-2 rounded px-5" variant="outline" 
+                                        type="submit">
                                     Join
                                 </Button>
                             </div> 
@@ -141,6 +153,11 @@ function DeckWatcher(props: { deck: Deck | undefined}) {
         setslideNo(props.deck.slides.length);
     }
 
+    /**
+     * Increments the slideNo state variable if the current value is less than the number of slides
+     * in the loaded preview.
+     * If there are no more slides, then the finished state variable is set to true.
+     */
     function nextPage() {
         if (!props.deck) {
             return;
@@ -156,7 +173,8 @@ function DeckWatcher(props: { deck: Deck | undefined}) {
     return (<>
         <div className="d-flex justify-content-center">
             <div style={{ width: "80vw" }}><AspectRatio ratio={16/9}>
-                <div className="w-full h-full overflow-hidden border border-dark rounded p-2 viewer">
+                <div className="w-full h-full overflow-hidden border border-dark rounded p-2
+                        viewer">
                     {!finished && preview[slideNo - 1]}
                     {finished && <PresentationFinished />}
                 </div>
@@ -173,7 +191,7 @@ function DeckWatcher(props: { deck: Deck | undefined}) {
 function PresentationFinished() {
     return (
         <div className="w-full h-full d-flex justify-content-center align-items-center finished">
-            Presentation finished.
+            Presentation finished.<br/>
             Thanks for watching!
         </div>
     )

@@ -64,3 +64,7 @@ div .spinner-grow {
     width: 1.2rem;
     height: 1.2rem;
 }
+
+.finished {
+    font-size: 2cqi;
+}

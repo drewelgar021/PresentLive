@@ -64,7 +64,7 @@ const META_OPEN =
     <meta:generator>deckconverter</meta:generator>\n`;
 const META_CLOSE = "</office:meta>\n";
 
-const VALID_DIRECTIVES = ["draft", "agenda", "backgroundColor", "layout"];
+const VALID_DIRECTIVES = ["draft", "agenda", "backgroundColor", "layout", "poll", "options"];
 
 /**
  * Tests each element of an array using a provided predicate, and returns
@@ -843,6 +843,42 @@ function generateAgendaJSX(model) {
     </div>);
 }
 
+/**
+ * Safely parses a slide's poll options into an array, returning an empty array
+ * if there is a syntax error.
+ *
+ * @param {Slide} slide - The poll slide whose options to parse.
+ *
+ * @return {[string]} An array containing each array option, or the empty array
+ *                    if there is a syntax error.
+ */
+function parsePollOptions(slide) {
+    try {
+        return JSON.parse(slide.options);
+    } catch {
+        return [];
+    }
+}
+
+/**
+ * Generates a poll based on the poll title and options.
+ * Blocks contained within this slide are ignored.
+ *
+ * @param {Slide} model - The slide being parsed to JSX, containing a poll.
+ *
+ * @return {JSX.Element} The poll slide displaying the title and a list of
+ *                       options.
+ */
+function generatePollSlideJSX(slide) {
+    const options = parsePollOptions(slide);
+    return(<div className="w-full h-full">
+        <h1>{slide.poll}</h1>
+        <ul>
+            {options.map((option, index) => <li key={index}>{option}</li>)}
+        </ul>
+        <p>Answer the poll using the form below the slide.</p>
+    </div>)
+}
 
 /**
  * Generates an agenda based on the titles of all (non-draft) slides in the
@@ -896,6 +932,7 @@ ${parseBlock(titleBlock)}
 }
 
 
+
 /**
  * Parses a JSON slide structue to a JSX slide.
  * It is assumed that the slide is valid.
@@ -921,6 +958,7 @@ function parseSlideToJSX(slide, model) {
 
     const slideContents =
         slide.agenda === null ? generateAgendaJSX(model) :
+        slide.poll !== undefined ? generatePollSlideJSX(slide) :
         slide.layout == "title" ? parseTitleSlideToJSX(slide) :
         slide.layout == "section" ? parseSectionSlideToJSX(slide) :
         slide.layout == "default" ? parseDefaultSlideToJSX(slide) :

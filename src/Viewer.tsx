@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Row from "react-bootstrap/Row"
 
-import type { Deck, Alert } from "./types"
+import type { Deck, Alert, Slide, Poll, PollResponse } from "./types"
 import { presentMDToJSX } from "./deckconverter";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 
@@ -11,6 +11,8 @@ const API = "https://comp2140-3ea651da.uqcloud.net/api";
 
 function Viewer() {
     const [model, setmodel] = useState<Deck>();
+    const [polls, setpolls] = useState<Poll[]>();
+    const [presentationID, setpresentationID] = useState<string>();
     const [code, setcode] = useState<string>();
     const [displayName, setdisplayName] = useState<string>();
     const [ready, setready] = useState<boolean>(false);
@@ -48,6 +50,8 @@ function Viewer() {
         }
 
         setmodel(response.data[0].model);
+        setpolls(response.data[0].polls);
+        setpresentationID(response.data[0].presentationid);
 
         const body = { viewers: [...response.data[0].viewers,
                                     { name: displayName, datetime: Date.now()}] }
@@ -129,7 +133,7 @@ function Viewer() {
             }
 
             {ready &&
-                <DeckWatcher deck={model} />
+                <DeckWatcher deck={model} polls={polls} presentationID={presentationID} />
             }
             <div className="d-flex justify-content-center mt-3">
                 <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
@@ -140,7 +144,13 @@ function Viewer() {
     );
 }
 
-function DeckWatcher(props: { deck: Deck | undefined}) {
+function DeckWatcher(
+    props: {
+        deck: Deck | undefined,
+        polls: Poll[] | undefined,
+        presentationID: string | undefined
+    }
+) {
     const [slideNo, setslideNo] = useState<number>(1);
     const [finished, setfinished] = useState<boolean>(false);
     const preview = presentMDToJSX(props.deck);
@@ -180,11 +190,17 @@ function DeckWatcher(props: { deck: Deck | undefined}) {
                 </div>
             </AspectRatio></div>
         </div>
+
+        {props.deck.slides[slideNo - 1].poll &&
+            <Poll slide={props.deck.slides[slideNo - 1]} />
+        }
+
         <div className="d-flex justify-content-center align-items-center mt-3">
             <Button className="rounded p-4" variant="outline" onClick={nextPage}>
                 Next
             </Button>
         </div>
+
     </>);
 }
 
@@ -195,6 +211,37 @@ function PresentationFinished() {
             Thanks for watching!
         </div>
     )
+}
+
+function Poll(props: { slide: Slide }) {
+    const [selected, setselected] = useState<string>();
+    if (!props.slide.poll || !props.slide.options) {
+        return <></>;
+    }
+    const options = JSON.parse(props.slide.options);
+    function submitPoll(e: React.SubmitEvent) {
+        e.preventDefault();
+        if (!selected) {
+            return;
+        }
+        
+    }
+
+    return (<>
+        <form onSubmit={submitPoll} className="d-flex flex-column align-items-center mt-3">
+            <h2>{props.slide.poll}</h2>
+
+            {options.map((option: string) =>
+                <div className="d-flex justify-content-center align-items-center my-2">
+                    <input type="radio" value={option} name="poll"
+                        onClick={() => setselected(option)} />
+                    <label className="ms-2">{option}</label>
+                </div>
+            )}
+
+            <Button className="rounded" variant="outline" type="submit">Submit</Button>
+        </form>
+    </>);
 }
 
 export default Viewer;

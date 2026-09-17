@@ -11,6 +11,8 @@ export type Slide = {
     display?: string,
     backgroundColor?: string,
     draft?: null,
+    poll?: string,
+    options?: string,
     content: object[]
 }
  

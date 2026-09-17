@@ -173,6 +173,10 @@ function DeckWatcher(
             return;
         }
 
+        if (finished) {
+            window.location.reload();
+        }
+
         if (slideNo < props.deck.slides.length) {
             setslideNo(slideNo + 1);
         } else {
@@ -197,7 +201,8 @@ function DeckWatcher(
 
         <div className="d-flex justify-content-center align-items-center mt-3">
             <Button className="rounded p-4" variant="outline" onClick={nextPage}>
-                Next
+                {!finished && <>Next</>}
+                {finished && <>Exit</>}
             </Button>
         </div>
 

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Row from "react-bootstrap/Row"
 
-import type { Deck, Alert, Slide, Poll, PollResponse } from "./types"
+import type { Deck, Alert, Slide, Poll } from "./types"
 import { presentMDToJSX } from "./deckconverter";
 import { AspectRatio } from "./components/ui/aspect-ratio";
 

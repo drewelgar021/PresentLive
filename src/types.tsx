@@ -36,14 +36,8 @@ export type Public = {
 }
 
 export type Poll = {
-    pollid: number,
-    options: PollOption[],
-    responses: PollResponse[]
-}
-
-type PollOption = {
     name: string,
-    selections: number
+    responses: PollResponse[]
 }
 
 type PollResponse = {

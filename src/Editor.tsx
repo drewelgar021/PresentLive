@@ -14,7 +14,7 @@ import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
-import type { Deck, Alert, PresentMD, Public } from "./types"
+import type { Deck, Alert, PresentMD, Public, Poll, PollResponse } from "./types"
 
 const PLACEHOLDER_PMD = "---\n"
                       + "title: My Presentation\n"
@@ -257,6 +257,20 @@ function Editor() {
     }
 
     /**
+     * Gets an array of polls from the current presentation.
+     * The returned array will have no responses recorded.
+     *
+     * @return The array of polls.
+     */
+    function getPolls(): Poll[] {
+        return model.slides.filter((slide) => slide.poll ? true : false)
+            .map((slide) => { return {
+                name: slide.poll ?? "",
+                responses: []
+            }});
+    }
+
+    /**
      * Sends a PUT or POST request to API/public to store a public presentation.
      * If a presentation with the same public code already exists, PUTs the new one.
      * Otherwise POSTs with a new, randomly generated code.
@@ -291,7 +305,7 @@ function Editor() {
             return await fetch(`${API}/public`,
                 {
                     method: "POST",
-                    body: JSON.stringify(body),
+                    body: JSON.stringify({ ...body, polls: getPolls()}),
                     headers: {
                         "Content-Type": "application/json",
                         "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
@@ -303,10 +317,20 @@ function Editor() {
             ).catch((error) => {console.error(error.message); return null});
         }
 
+        // Overwrite currently existing presentation.
+        const existingPollNames: string[] = existing.data[0].polls.map((poll: Poll) => poll.name);
+        const polls = [
+            ...existing.data[0].polls,
+            ...getPolls().filter((poll) => !(existingPollNames.includes(poll.name)))
+        ];
         return await fetch(`${API}/public/${existing.data[0].id}`,
             {
                 method: "PUT",
-                body: JSON.stringify(body),
+                body: JSON.stringify({
+                    ...body,
+                    polls: polls,
+                    viewers: existing.data[0].viewers
+                }),
                 headers: {
                     "Content-Type": "application/json",
                     "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,

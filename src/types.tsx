@@ -32,15 +32,11 @@ export type Public = {
     id: string,
     public_code: string
     model: string,
-    viewers: string
+    viewers: { name: string, datetime: Date }[]
 }
 
 export type Poll = {
     name: string,
-    responses: PollResponse[]
-}
-
-type PollResponse = {
-    responder: string,
-    selection: string
+    options: string[],
+    responses: { responder: string, selection: string }[]
 }

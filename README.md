@@ -63,12 +63,14 @@ or the API will respond with a `401`.
 5. Click "New Presentation" to start fresh.
 6. Type the presentation code from before into the text input that says "Code".
    Now click the "Load" button to restore the presentation that you had before.
-7. Click the "Delete" button, then try to load the same presentation from before.
+7. Open a new tab and navigate to `<url>/edit/<code>` and your presentation will open in the editor
+   straight away.
+8. Click the "Delete" button, then try to load the same presentation from before.
    Notice that it no longer exists.
-8. Type a topic into the "Write me a presentation about..." text input and click "Generate".
+9. Type a topic into the "Write me a presentation about..." text input and click "Generate".
    After it loads, the editor and preview will show an AI generated presentation about the provided
    topic.
-9. Add a poll somewhere in the presentation using the syntax below.
+10. Add a poll somewhere in the presentation using the syntax below.
    The square brackets and quotation marks are required for options, which will be parsed as a JSON
    array.
 ```md
@@ -93,18 +95,20 @@ or the API will respond with a `401`.
 - All actions that have possible failures trigger visual alerts upon their failure or success.
 
 ### A Multi-Entity Data Structure
-- There are 3 related data entities:
-  - `presentmd`: `{ code, contents }` to store editable presentations.
-  - `public`: `{ public_code, model, viewers, polls }` to store publicly viewable presentations.
-  - `poll`: `{ pollid, options, responses }` stores poll options and responses.
-    - `poll` is not its own entity in the API, but instead its structure is enforced by TypeScript
-      type declarations on the frontend, before it is sent to the API.
-    - All of a presentation's `poll`s are stored in the `polls` attribute of the `public` entity.
-    - These decisions were made to simplify the logic for handling poll responses, and reduce the
-      number of API requests necessary for implementing polls.
+```ts
+type PresentMD = { code: string, public_code: string, contents: string }
+type Public = { public_code: string, model: Deck, viewers: Viewer[], polls: Poll[] }
+type Deck = { title: string, author: string, backgroundColor?: string, color?: string, layout?: string, slides: Slide[] }
+type Slide = { display?: string, backgroundColor?: string, draft?: null, poll?: string, options?: string, content: object[] }
+type Viewer = { name: string, timestamp: Time }
+type Poll = { name: string, options: string[], responses: PollResponse[] }
+type PollResponse = { responder: string, selection: string }
+```
+
 - These data entities are stored and retrieved via the RESTful API provided by the course.
 - Records can be added, deleted, and edited using the GUI controls in the app.
 - Text inputs are validated with alerts to display success or failure of inputs.
+
   Alerts use user-friendly, plain English messages while specific errors are logged in the console.
 
 ### Data Collection and Interaction
@@ -133,7 +137,10 @@ or the API will respond with a `401`.
 ### Unique Link Access
 - A unique presentation code is generated so that editors and their collaborators can access and
   edit an already initialised presentation.
-- A unique public code is generated so that users can view the presentation.
+- A presentation saved to the API can be accessed by adding `/<code>` to the url, where `<code>` is
+  the unique presentation code generated from saving.
+- A unique public code is generated so that users can view the presentation without being able to
+  edit it.
 - Authentication is not required for these accesses.
 
 ### AI Integration

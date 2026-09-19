@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import CodeEditor from "@uiw/react-textarea-code-editor";
 import rehypePrism from "rehype-prism-plus";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
@@ -8,6 +8,7 @@ import { Field } from "@/components/ui/field";
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import { customAlphabet } from "nanoid";
 import { z } from "zod"
+import { useParams } from "react-router-dom";
 
 import { presentMDToModel, presentMDToJSX } from "./deckconverter";
 
@@ -127,6 +128,13 @@ function Editor() {
     const [prompt, setprompt] = useState<string>();
     const [isGenerating, setisGenerating] = useState<boolean>(false);
 
+    const { code: urlCode } = useParams<{ code?: string }>();
+    useEffect(() => {
+        if (urlCode) {
+            getPMD(urlCode);
+        }
+    }, [urlCode]);
+
 
     async function updatePreview(presentmd: string) {
         setmd(presentmd);
@@ -142,8 +150,8 @@ function Editor() {
      * Loads a presentation from the API into the editor given the loadCode in state.
      * Sets the state variable invalidLoad if the load was not successful.
      */
-    async function getPMD() {
-        const response = await fetch(`${API}/presentmd?code=${loadCode}`,
+    async function getPMD(code: string) {
+        const response = await fetch(`${API}/presentmd?code=${code}`,
         {
             method: "GET",
             headers: {
@@ -167,7 +175,7 @@ function Editor() {
             setinvalidLoad(false);
             setmd(response.data[0].contents);
             setmodel(presentMDToModel(response.data[0].contents));
-            setcode(loadCode);
+            setcode(code);
             setpublicCode(response.data[0].public_code);
             setpublic(response.data[0].public_code ? true : false);
             setAlert({ hidden: false, type: "success",
@@ -547,7 +555,8 @@ function Editor() {
                                     setinvalidLoad(false);
                                 }} aria-invalid={invalidLoad} value={loadCode} />
                         </Field>
-                        <Button className="rounded" variant="outline" onClick={getPMD}>
+                        <Button className="rounded" variant="outline"
+                                onClick={() => getPMD(loadCode)}>
                             Load
                         </Button>
                     </div>

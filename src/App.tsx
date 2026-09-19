@@ -40,6 +40,7 @@ function App() {
             <Header/>
             <Routes>
                 <Route index path="edit" element={<Editor/>} />
+                <Route path="edit/:code" element={<Editor />} />
                 <Route path="watch" element={<Viewer/>} />
                 <Route path="/" element={<Navigate to="edit"/>}/>
             </Routes>

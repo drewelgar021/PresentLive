@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Row from "react-bootstrap/Row"
@@ -51,7 +51,7 @@ function Viewer() {
 
         setmodel(response.data[0].model);
         setpolls(response.data[0].polls);
-        setpresentationID(response.data[0].presentationid);
+        setpresentationID(response.data[0].id);
 
         const body = { viewers: [...response.data[0].viewers,
                                     { name: displayName, datetime: Date.now()}] }
@@ -133,7 +133,8 @@ function Viewer() {
             }
 
             {ready &&
-                <DeckWatcher deck={model} polls={polls} presentationID={presentationID} />
+                <DeckWatcher deck={model} polls={polls} presentationID={presentationID}
+                        displayName={displayName} />
             }
             <div className="d-flex justify-content-center mt-3">
                 <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
@@ -148,7 +149,8 @@ function DeckWatcher(
     props: {
         deck: Deck | undefined,
         polls: Poll[] | undefined,
-        presentationID: string | undefined
+        presentationID: string | undefined,
+        displayName: string | undefined
     }
 ) {
     const [slideNo, setslideNo] = useState<number>(1);
@@ -196,7 +198,8 @@ function DeckWatcher(
         </div>
 
         {props.deck.slides[slideNo - 1].poll &&
-            <Poll slide={props.deck.slides[slideNo - 1]} />
+            <PollForm slide={props.deck.slides[slideNo - 1]} presentationID={props.presentationID}
+                    displayName={props.displayName} />
         }
 
         <div className="d-flex justify-content-center align-items-center mt-3">
@@ -218,18 +221,80 @@ function PresentationFinished() {
     )
 }
 
-function Poll(props: { slide: Slide }) {
+function PollForm(props: {
+        slide: Slide,
+        presentationID: string | undefined,
+        displayName: string | undefined }
+) {
     const [selected, setselected] = useState<string>();
+    const [alert, setalert] = useState<Alert>({ hidden: true, type: "dark", message: <></>});
     if (!props.slide.poll || !props.slide.options) {
         return <></>;
     }
     const options = JSON.parse(props.slide.options);
-    function submitPoll(e: React.SubmitEvent) {
+
+    async function submitPoll(e: React.SubmitEvent) {
         e.preventDefault();
         if (!selected) {
             return;
         }
-        
+
+        const response = await fetch(`${API}/public?id=${props.presentationID}`,
+            {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`
+                }
+            }).then((response) => response.ok ?
+                response.json() :
+                Promise.reject(new Error(response.statusText ?? "Unknown error."))
+            ).catch((error) => console.error(error.message));
+
+        if (!response) {
+            setalert({ hidden: false, type: "danger",
+                message: <><b>Error:</b> Could not retrieve poll information.
+                        Please check API status.</>});
+            return;
+        }
+
+        if (response.data.length == 0) {
+            setalert({ hidden: false, type: "danger",
+                message: <><b>Error:</b> Could not find presentation in API.</>})
+        }
+
+        const polls = response.data[0].polls;
+
+        const currentPoll = polls.filter((poll: Poll) => poll.name == props.slide.poll)[0];
+        const otherPolls = polls.filter((poll: Poll) => poll.name != props.slide.poll);
+
+        const body = { polls: [
+            ...otherPolls, {
+                name: currentPoll.name,
+                responses: [
+                    ...currentPoll.responses,
+                    { responder: props.displayName, selection: selected }
+                ]
+            }
+        ] }
+
+        const success = await fetch(`${API}/public/${props.presentationID}`,
+            {
+                method: "PATCH",
+                headers: {
+                    Authorization: `Bearer ${import.meta.env.VITE_API_KEY}`,
+                },
+                body: JSON.stringify(body)
+            }
+        ).then((response) => response.ok ?
+            true : 
+            Promise.reject(new Error(response.statusText ?? "Unknown error."))
+        ).catch((error) => {console.error(error.message); return false});
+
+        setalert({ hidden: false, type: success ? "success" : "danger",
+                message: success ? <>Poll response submitted successfully</> :
+                                   <><b>Error:</b> Could not submit poll response.
+                                     Check API status.</>});
+
     }
 
     return (<>
@@ -246,6 +311,10 @@ function Poll(props: { slide: Slide }) {
 
             <Button className="rounded" variant="outline" type="submit">Submit</Button>
         </form>
+        
+        <div className="d-flex align-items-center justify-content-center mt-3">
+            <div className={`alert alert-${alert.type}`}>{alert.message}</div>
+        </div>
     </>);
 }
 

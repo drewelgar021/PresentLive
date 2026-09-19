@@ -67,9 +67,7 @@ async function codeGenerator() {
             headers: {
                 "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
             }
-        }
-    )
-        .then((response) => response.ok ?
+        }).then((response) => response.ok ?
             response.json() :
             Promise.reject(new Error(response.statusText ?? "Unknown error.")))
         .catch((error) => console.error(error.message));
@@ -565,7 +563,7 @@ function Editor() {
                         </Button>
                     </div>
 
-                    <div className="d-flex align-otems-center mt-2">
+                    <div className="d-flex align-items-center mt-2">
                         <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
                             {alert.message}
                         </div>

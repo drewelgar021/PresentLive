@@ -44,6 +44,7 @@ function App() {
                 <Route path="edit/:code" element={<Editor />} />
                 <Route path="watch" element={<Viewer />} />
                 <Route path="analytics" element={<Analytics />} />
+                <Route path="analytics/:code" element={<Analytics />} />
                 <Route path="/" element={<Navigate to="edit"/>} />
             </Routes>
         </div></Router>

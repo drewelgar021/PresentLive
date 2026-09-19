@@ -104,7 +104,7 @@ function Viewer() {
                         <Row className="mt-5">
                             <div className="d-flex justify-content-center align-items-center">
                                 <label>Watch Code:</label> 
-                                <Input className="mx-2" style={{ maxWidth: "100px" }}
+                                <Input className="mx-2" style={{ maxWidth: "140px" }}
                                     placeholder="w-xxxxxx" value={code}
                                     onChange={(e) => setcode(e.target.value)} />
                             </div>
@@ -294,7 +294,6 @@ function PollForm(props: {
                 message: success ? <>Poll response submitted successfully</> :
                                    <><b>Error:</b> Could not submit poll response.
                                      Check API status.</>});
-
     }
 
     return (<>
@@ -311,7 +310,7 @@ function PollForm(props: {
 
             <Button className="rounded" variant="outline" type="submit">Submit</Button>
         </form>
-        
+
         <div className="d-flex align-items-center justify-content-center mt-3">
             <div className={`alert alert-${alert.type}`}>{alert.message}</div>
         </div>

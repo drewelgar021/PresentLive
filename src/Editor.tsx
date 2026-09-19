@@ -152,16 +152,16 @@ function Editor() {
      */
     async function getPMD(code: string) {
         const response = await fetch(`${API}/presentmd?code=${code}`,
-        {
-            method: "GET",
-            headers: {
-                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+            {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                }
             }
-        })
-        .then((response) => response.ok ?
+        ).then((response) => response.ok ?
             response.json() :
-            Promise.reject(new Error(response.statusText ?? "Unknown error.")))
-        .catch((error) => console.error(error.message));
+            Promise.reject(new Error(response.statusText ?? "Unknown error."))
+        ).catch((error) => console.error(error.message));
 
         if (response.total == 0) {
             setinvalidLoad(true);
@@ -268,7 +268,7 @@ function Editor() {
      *
      * @return The array of polls.
      */
-    function getPolls(): Poll[] {
+    function getPolls() {
         return model.slides.filter((slide) => slide.poll ? true : false)
             .map((slide) => { return {
                 name: slide.poll ?? "",

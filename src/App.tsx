@@ -5,12 +5,13 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import "./App.css";
 import Editor from "./Editor";
 import Viewer from "./Viewer";
-
+import Analytics from "./Analytics";
 import Row from "react-bootstrap/Row"
 
 const navLinks = [
-    {name: "Edit", path: "edit"},
-    {name: "Watch", path: "watch"}
+    { name: "Edit", path: "edit" },
+    { name: "Watch", path: "watch" },
+    { name: "Analytics", path: "analytics" }
 ];
 
 function Header() {
@@ -41,8 +42,9 @@ function App() {
             <Routes>
                 <Route index path="edit" element={<Editor/>} />
                 <Route path="edit/:code" element={<Editor />} />
-                <Route path="watch" element={<Viewer/>} />
-                <Route path="/" element={<Navigate to="edit"/>}/>
+                <Route path="watch" element={<Viewer />} />
+                <Route path="analytics" element={<Analytics />} />
+                <Route path="/" element={<Navigate to="edit"/>} />
             </Routes>
         </div></Router>
     </>);

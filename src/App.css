@@ -68,3 +68,7 @@ div .spinner-grow {
 .finished {
     font-size: 2cqi;
 }
+
+.code {
+    font-family: "JetBrains Mono", monospace;
+}

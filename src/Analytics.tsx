@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { Public, PresentMD, Alert } from "./types.tsx"
 import { useParams } from "react-router-dom";
-import Row from "react-bootstrap/Row";
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 
@@ -14,6 +13,7 @@ function Analytics() {
     const [publicPresentation, setpublicPresentation] = useState<Public>();
     const [alert, setalert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
     const [showInfo, setshowInfo] = useState<boolean>(false);
+    const [showViewers, setshowViewers] = useState<boolean>(false);
 
     const { code: urlCode } = useParams<{ code?: string }>();
     useEffect(() => {
@@ -87,13 +87,16 @@ function Analytics() {
         setshowInfo(!showInfo);
     }
 
+    function toggleViewers() {
+        setshowViewers(!showViewers);
+    }
+
     function exit() {
         setprivatePresentation(undefined);
         setpublicPresentation(undefined);
         setalert({ ...alert, hidden: true });
         setshowInfo(false);
     }
-
 
     return <>
         <div className="d-flex align-items-center justify-content-center mt-3">
@@ -103,37 +106,33 @@ function Analytics() {
         </div>
 
         {!privatePresentation && <>
-            <Row>
-                <div className="d-flex justify-content-center align-items-center mt-3">
-                    <label>Presentation Code:</label>
-                    <Input className="mx-2" style={{maxWidth: "140px"}} placeholder="Code"
-                            value={loadCode} onChange={(e) => setloadCode(e.target.value)} />
-                </div>
-            </Row>
-            <Row>
-                <div className="d-flex justify-content-center align-items-center mt-3">
-                    <Button variant="outline" className="rounded p-3"
-                            onClick={() => getPresentation(loadCode)}>
-                        Load Analytics
-                    </Button>
-                </div>
-            </Row></>
+            <div className="d-flex justify-content-center align-items-center mt-3">
+                <label>Presentation Code:</label>
+                <Input className="mx-2" style={{maxWidth: "140px"}} placeholder="Code"
+                        value={loadCode} onChange={(e) => setloadCode(e.target.value)} />
+            </div>
+            <div className="d-flex justify-content-center align-items-center mt-3">
+                <Button variant="outline" className="rounded p-3"
+                        onClick={() => getPresentation(loadCode)}>
+                    Load Analytics
+                </Button>
+            </div>
+        </>
         }
         {privatePresentation && <>
-            <Row>
-                <div className="d-flex justify-content-center align-items-center mt-3">
-                    <Button variant="outline" className="rounded p-3" onClick={() => exit()}>
-                        Exit
-                    </Button>
-                </div>
-            </Row>
+            <div className="d-flex justify-content-center align-items-center mt-3">
+                <Button variant="outline" className="rounded p-3" onClick={() => exit()}>
+                    Exit
+                </Button>
+            </div>
 
             <div className="d-flex align-items-center justify-content-center mt-3">
                 <Button variant="outline" className="rounded p-3"
                         onClick={() => togglePresentationInfo()}>
-                    Presentation Info
+                    Show Presentation Info
                 </Button>
             </div>
+
             {showInfo &&
                 <div className="d-flex align-items-center justify-content-center mt-3">
                     <table className="table table-bordered mx-5"><tbody>
@@ -143,7 +142,9 @@ function Analytics() {
                         </tr>
                         <tr>
                             <th>contents</th>
-                            <td>{privatePresentation.contents}</td>
+                            <td className="whitespace-pre-wrap code">
+                                {privatePresentation.contents}
+                            </td>
                         </tr>
                     {publicPresentation && <>
                         <tr>
@@ -152,14 +153,46 @@ function Analytics() {
                         </tr>
                         <tr>
                             <th>model</th>
-                            <td>{JSON.stringify(publicPresentation.model)}</td>
+                            <td className="whitespace-pre-wrap code">
+                                {JSON.stringify(publicPresentation.model, null, 2)}
+                            </td>
                         </tr>
                     </>}
                     </tbody></table>
                 </div>
             }
-        </>}
 
+            {publicPresentation && <>
+                <div className="d-flex align-items-center justify-content-center mt-3">
+                    <Button variant="outline" className="rounded p-3"
+                            onClick={() => toggleViewers()}>
+                        Show Viewer Info
+                    </Button>
+
+                </div>
+                {showViewers &&
+                    <div className="d-flex align-items-center justify-content-center mt-3">
+                        <table className="table mx-5">
+                            <thead><tr>
+                                <th>Name</th>
+                                <th>Time Viewed</th>
+                            </tr></thead>
+                            <tbody>
+                                {publicPresentation.viewers.sort((v1, v2) =>  v2.datetime - v1.datetime).map((viewer) => <tr>
+                                    <td>{viewer.name}</td>
+                                    <td>{new Date(viewer.datetime).toString()}</td>
+                                </tr>)}
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                <div className="d-flex align-items-center justify-content-center mt-3 flex-column">
+                    <h1>{publicPresentation.model.title ?? "Untitled Presentation"}</h1>
+                    <p>{publicPresentation.viewers.length} viewers</p>
+                    <p>Last modified on {new Date(privatePresentation.updated_at).toString()}</p>
+                </div>
+            </>}
+        </>}
     </>;
 }
 

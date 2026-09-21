@@ -24,6 +24,7 @@ export type Alert = {
 
 export type PresentMD = {
     id: string,
+    updated_at: string,
     code: string,
     contents: string,
     public_code?: string
@@ -32,8 +33,8 @@ export type PresentMD = {
 export type Public = {
     id: string,
     public_code: string
-    model: string,
-    viewers: { name: string, datetime: Date }[]
+    model: Deck,
+    viewers: { name: string, datetime: number }[]
 }
 
 export type Poll = {

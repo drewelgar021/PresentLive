@@ -49,8 +49,7 @@ function Analytics() {
             return;
         }
 
-        setalert({ hidden: false, type: "success",
-            message: <>Presentation analytics loaded successfully!</>});
+        setalert({ ...alert, hidden: true });
 
         setprivatePresentation(privateResponse.data[0]);
 
@@ -107,9 +106,16 @@ function Analytics() {
         setshowResponseVec({ ...showResponseVec, [index]: !current });
     }
 
-    return <>
-        <div className="d-flex align-items-center justify-content-center mt-3">
-            <div className={`alert alert-${alert.type}`} hidden={alert.hidden}>
+    return <div className="px-4">
+        {privatePresentation &&
+            <div className="d-flex justify-content-center align-items-center mt-3">
+                <Button variant="outline" className="rounded p-3" onClick={() => exit()}>
+                    Exit
+                </Button>
+            </div>
+        }
+        <div className="d-flex align-items-center justify-content-center">
+            <div className={`alert alert-${alert.type} mt-3`} hidden={alert.hidden}>
                 {alert.message}
             </div>
         </div>
@@ -128,13 +134,17 @@ function Analytics() {
             </div>
         </>
         }
+        <div className="d-flex align-items-center justify-content-center mt-3 flex-column">
+            {publicPresentation && <>
+                <h1>{publicPresentation.model.title ?? "Untitled Presentation"}</h1>
+                <p>{publicPresentation.viewers.length} viewers</p>
+                {privatePresentation && // should always be true, stops tsls from crying
+                    <p>Last modified {new Date(privatePresentation.updated_at).toString()}</p>
+                }
+            </>}
+            {privatePresentation && !publicPresentation && <h1>Private Presentation</h1>}
+        </div>
         {privatePresentation && <>
-            <div className="d-flex justify-content-center align-items-center mt-3">
-                <Button variant="outline" className="rounded p-3" onClick={() => exit()}>
-                    Exit
-                </Button>
-            </div>
-
             <div className="d-flex align-items-center justify-content-center mt-3">
                 <Button variant="outline" className="rounded p-3"
                         onClick={() => togglePresentationInfo()}>
@@ -144,7 +154,7 @@ function Analytics() {
 
             {showInfo &&
                 <div className="d-flex align-items-center justify-content-center mt-3">
-                    <table className="table table-bordered mx-5"><tbody>
+                    <table className="table table-bordered"><tbody>
                         <tr>
                             <th>code</th>
                             <td>{privatePresentation.code}</td>
@@ -181,7 +191,7 @@ function Analytics() {
                 </div>
                 {showViewers &&
                     <div className="d-flex align-items-center justify-content-center mt-3">
-                        <table className="table mx-5">
+                        <table className="table">
                             <thead><tr>
                                 <th>Name</th>
                                 <th>Time Viewed</th>
@@ -195,10 +205,7 @@ function Analytics() {
                         </table>
                     </div>
                 }
-                <div className="d-flex align-items-center justify-content-center mt-3 flex-column">
-                    <h1>{publicPresentation.model.title ?? "Untitled Presentation"}</h1>
-                    <p>{publicPresentation.viewers.length} viewers</p>
-                    <p>Last modified on {new Date(privatePresentation.updated_at).toString()}</p>
+                <div className="d-flex align-items-center justify-content-center mt-2">
                     <h2 className="mt-3">Poll Data</h2>
                 </div>
                 {publicPresentation.polls.map((poll, index) =>
@@ -210,7 +217,7 @@ function Analytics() {
                             Show Responses
                         </Button>
                         {showResponseVec[index] &&
-                            <table className="table mx-5 mt-3">
+                            <table className="table mt-3">
                                 <thead><tr>
                                     <th>Responder</th>
                                     <th>Response</th>
@@ -227,7 +234,7 @@ function Analytics() {
                 )}
             </>}
         </>}
-    </>;
+    </div>;
 }
 
 export default Analytics

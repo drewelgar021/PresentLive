@@ -7,18 +7,17 @@ import { useParams } from "react-router-dom";
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 
 function Analytics() {
-    const [code, setcode] = useState<string>();
     const [loadCode, setloadCode] = useState<string>("");
     const [privatePresentation, setprivatePresentation] = useState<PresentMD>();
     const [publicPresentation, setpublicPresentation] = useState<Public>();
     const [alert, setalert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
     const [showInfo, setshowInfo] = useState<boolean>(false);
     const [showViewers, setshowViewers] = useState<boolean>(false);
+    const [showResponseVec, setshowResponseVec] = useState<{ [index: number]: boolean }>({});
 
     const { code: urlCode } = useParams<{ code?: string }>();
     useEffect(() => {
         if (urlCode) {
-            // eslint-disable-next-line react-hooks/immutability
             getPresentation(urlCode);
         }
     }, [urlCode]);
@@ -96,6 +95,16 @@ function Analytics() {
         setpublicPresentation(undefined);
         setalert({ ...alert, hidden: true });
         setshowInfo(false);
+    }
+
+    /**
+     * Shows individual responses in a table for a poll.
+     *
+     * @param index - The index of the poll in publicPresentation.polls for which to show responses.
+     */
+    function showResponses(index: number) {
+        const current = showResponseVec[index] ?? false;
+        setshowResponseVec({ ...showResponseVec, [index]: !current });
     }
 
     return <>
@@ -190,7 +199,32 @@ function Analytics() {
                     <h1>{publicPresentation.model.title ?? "Untitled Presentation"}</h1>
                     <p>{publicPresentation.viewers.length} viewers</p>
                     <p>Last modified on {new Date(privatePresentation.updated_at).toString()}</p>
+                    <h2 className="mt-3">Poll Data</h2>
                 </div>
+                {publicPresentation.polls.map((poll, index) =>
+                    <div className="d-flex align-items-center justify-content-center mt-2
+                            flex-column">
+                        <h3>{poll.name}</h3>
+                        <Button variant="outline" className="rounded p-3"
+                                onClick={() => showResponses(index)}>
+                            Show Responses
+                        </Button>
+                        {showResponseVec[index] &&
+                            <table className="table mx-5 mt-3">
+                                <thead><tr>
+                                    <th>Responder</th>
+                                    <th>Response</th>
+                                </tr></thead>
+                                <tbody>
+                                    {poll.responses.map((response) => <tr>
+                                        <td>{response.responder}</td>
+                                        <td>{response.selection}</td>
+                                    </tr>)}
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                )}
             </>}
         </>}
     </>;

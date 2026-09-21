@@ -34,7 +34,8 @@ export type Public = {
     id: string,
     public_code: string
     model: Deck,
-    viewers: { name: string, datetime: number }[]
+    viewers: { name: string, datetime: number }[],
+    polls: Poll[]
 }
 
 export type Poll = {

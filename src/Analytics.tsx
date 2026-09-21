@@ -13,6 +13,7 @@ function Analytics() {
     const [privatePresentation, setprivatePresentation] = useState<PresentMD>();
     const [publicPresentation, setpublicPresentation] = useState<Public>();
     const [alert, setalert] = useState<Alert>({ hidden: true, type: "dark", message: <></> });
+    const [showInfo, setshowInfo] = useState<boolean>(false);
 
     const { code: urlCode } = useParams<{ code?: string }>();
     useEffect(() => {
@@ -82,6 +83,17 @@ function Analytics() {
         setpublicPresentation(publicResponse.data[0]);
     }
 
+    function togglePresentationInfo() {
+        setshowInfo(!showInfo);
+    }
+
+    function exit() {
+        setprivatePresentation(undefined);
+        setpublicPresentation(undefined);
+        setalert({ ...alert, hidden: true });
+        setshowInfo(false);
+    }
+
 
     return <>
         <div className="d-flex align-items-center justify-content-center mt-3">
@@ -90,8 +102,8 @@ function Analytics() {
             </div>
         </div>
 
-        {!privatePresentation &&
-            <><Row>
+        {!privatePresentation && <>
+            <Row>
                 <div className="d-flex justify-content-center align-items-center mt-3">
                     <label>Presentation Code:</label>
                     <Input className="mx-2" style={{maxWidth: "140px"}} placeholder="Code"
@@ -107,6 +119,47 @@ function Analytics() {
                 </div>
             </Row></>
         }
+        {privatePresentation && <>
+            <Row>
+                <div className="d-flex justify-content-center align-items-center mt-3">
+                    <Button variant="outline" className="rounded p-3" onClick={() => exit()}>
+                        Exit
+                    </Button>
+                </div>
+            </Row>
+
+            <div className="d-flex align-items-center justify-content-center mt-3">
+                <Button variant="outline" className="rounded p-3"
+                        onClick={() => togglePresentationInfo()}>
+                    Presentation Info
+                </Button>
+            </div>
+            {showInfo &&
+                <div className="d-flex align-items-center justify-content-center mt-3">
+                    <table className="table table-bordered mx-5"><tbody>
+                        <tr>
+                            <th>code</th>
+                            <td>{privatePresentation.code}</td>
+                        </tr>
+                        <tr>
+                            <th>contents</th>
+                            <td>{privatePresentation.contents}</td>
+                        </tr>
+                    {publicPresentation && <>
+                        <tr>
+                            <th>public_code</th>
+                            <td>{privatePresentation.public_code}</td>
+                        </tr>
+                        <tr>
+                            <th>model</th>
+                            <td>{JSON.stringify(publicPresentation.model)}</td>
+                        </tr>
+                    </>}
+                    </tbody></table>
+                </div>
+            }
+        </>}
+
     </>;
 }
 

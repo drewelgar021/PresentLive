@@ -25,7 +25,8 @@ export type Alert = {
 export type PresentMD = {
     id: string,
     code: string,
-    contents: string
+    contents: string,
+    public_code?: string
 }
 
 export type Public = {

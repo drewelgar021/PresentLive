@@ -29,8 +29,10 @@ The environment variable `AI_API_KEY` must be set to a valid API key.
 
 ## Editing PresentMD With Live Preview
 
-Any features that use the API must have environment variable `VITE_API_KEY` set to a valid API key,
-or the API will respond with a `401`.
+Any features that use the API (saving, loading, AI assistant) must have environment variable
+`VITE_API_KEY` set to a valid API key, or the API will respond with a `401`.
+
+Use of the AI assistant requires the environment variable `AI_API_KEY` to be set to a valid key.
 
 ### GUI Controls
 ![Editor GUI](/img/editor.png "Editor GUI")
@@ -49,6 +51,9 @@ or the API will respond with a `401`.
 - "Delete" deletes the current presentation from the API.
   This option will only be available if working on a presentation that was loaded from the API.
 - "Generate" uses the AI assistant to generate a new presentation about the provided topic.
+- "Download MD" downloads a markdown file to the local device containing the contents of the editor.
+- "Export ODF" downloads a Flat ODP file to the local device which can be opened in LibreOffice
+  Impress.
 - The arrow icons below the preview window change the slide being shown in the preview.
   The current slide number is displayed between them.
 
@@ -63,24 +68,48 @@ or the API will respond with a `401`.
 5. Click "New Presentation" to start fresh.
 6. Type the presentation code from before into the text input that says "Code".
    Now click the "Load" button to restore the presentation that you had before.
-7. Open a new tab and navigate to `<url>/edit/<code>` and your presentation will open in the editor
-   straight away.
-8. Click the "Delete" button, then try to load the same presentation from before.
+7. Open a new tab and navigate to `http://localhost:5173/edit/<code>` and your presentation will
+   open in the editor straight away.
+8. Download the Markdown file, and export to ODF to open in LibreOffice using the buttons below the
+   editor.
+   I promise these do not give you a virus.
+9. Click the "Delete" button, then try to load the same presentation from before.
    Notice that it no longer exists.
-9. Type a topic into the "Write me a presentation about..." text input and click "Generate".
-   After it loads, the editor and preview will show an AI generated presentation about the provided
-   topic.
-10. Add a poll somewhere in the presentation using the syntax below.
-   The square brackets and quotation marks are required for options, which will be parsed as a JSON
-   array.
+10. Type a topic into the "Write me a presentation about..." text input and click "Generate".
+    After it loads, the editor and preview will show an AI generated presentation about the provided
+    topic.
+11. Add a poll somewhere in the presentation using the syntax below.
+    The square brackets and quotation marks are required for options, which will be parsed as a JSON
+    array.
 ```md
 <!-- poll: <title> -->
 
 <!-- options: ["<option 1>", ...] -->
 ```
-10. Save the presentation after checking the "Public" box.
-   There is now an additional public code.
-   Save this for later to test the presentation watcher.
+12. Save the presentation after checking the "Public" box.
+    There is now an additional public code.
+    Consider saving both of these codes to test the other workflows!
+
+## Viewing Presentations
+
+This workflow requires use of the API, so environment variable `VITE_API_KEY` must be set to a valid
+API key.
+
+- Use the form to input a public presentation code (starting with `w-`), and a display name.
+- Watch the presentation starting from the first slide, and press the "Next" button to progress to
+  the next slide.
+  You cannot go back slides (as per assignment brief).
+- On slides containing polls, a poll form will appear below the slide.
+  Select an option and click the "Submit" button to submit your response.
+
+### Workflow
+1. Enter a public presentation code (the one starting with `w-`) and display name into the
+   respective text inputs and click "Join" to start a presentation.
+2. Click the "Next" button to advance to the next slide.
+3. When a poll slide is reached, use the form below the preview window to submit a response to the
+   poll.
+   The slide will be advanced upon submission.
+4. When the end of the presentation is reached, click "Exit" to exit the presentation.
 
 ## Satisfaction of Functionality Requirements
 
@@ -108,8 +137,6 @@ type PollResponse = { responder: string, selection: string }
 - These data entities are stored and retrieved via the RESTful API provided by the course.
 - Records can be added, deleted, and edited using the GUI controls in the app.
 - Text inputs are validated with alerts to display success or failure of inputs.
-
-  Alerts use user-friendly, plain English messages while specific errors are logged in the console.
 
 ### Data Collection and Interaction
 - All data collected is intended to be used again in the app.
@@ -148,7 +175,8 @@ type PollResponse = { responder: string, selection: string }
   It directly modifies the contents of the markdown input field.
 
 ### Advanced Features
-- Export presentation to .fodp.
+- Bar graphs displaying poll info.
+- Download `.md` and export presentation to `.fodp`.
 
 ## AI Usage Statement / References
 No generative AI tools were used in the completion of this assessment.

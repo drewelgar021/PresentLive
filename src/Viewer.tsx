@@ -199,7 +199,7 @@ function DeckWatcher(
 
         {props.deck.slides[slideNo - 1].poll &&
             <PollForm slide={props.deck.slides[slideNo - 1]} presentationID={props.presentationID}
-                    displayName={props.displayName} />
+                    displayName={props.displayName} nextPage={nextPage} />
         }
 
         <div className="d-flex justify-content-center align-items-center mt-3">
@@ -224,7 +224,8 @@ function PresentationFinished() {
 function PollForm(props: {
         slide: Slide,
         presentationID: string | undefined,
-        displayName: string | undefined }
+        displayName: string | undefined,
+        nextPage: () => void }
 ) {
     const [selected, setselected] = useState<string>();
     const [alert, setalert] = useState<Alert>({ hidden: true, type: "dark", message: <></>});
@@ -299,6 +300,7 @@ function PollForm(props: {
                 message: success ? <>Poll response submitted successfully</> :
                                    <><b>Error:</b> Could not submit poll response.
                                      Check API status.</>});
+        props.nextPage();
     }
 
     return (<>

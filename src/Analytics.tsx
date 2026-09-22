@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import type { Public, PresentMD, Alert } from "./types.tsx"
+import type { Public, PresentMD, Alert, Poll } from "./types.tsx"
 import { useParams } from "react-router-dom";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig }
+    from "@/components/ui/chart.tsx";
+import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
 
@@ -14,8 +17,11 @@ function Analytics() {
     const [showInfo, setshowInfo] = useState<boolean>(false);
     const [showViewers, setshowViewers] = useState<boolean>(false);
     const [showResponseVec, setshowResponseVec] = useState<{ [index: number]: boolean }>({});
+    const [chartData, setchartData] = useState();
 
+    const chartConfig: ChartConfig = { responses: { label: "Responses", color: "#a0a0a0" } }
     const { code: urlCode } = useParams<{ code?: string }>();
+
     useEffect(() => {
         if (urlCode) {
             getPresentation(urlCode);
@@ -79,6 +85,15 @@ function Analytics() {
         }
 
         setpublicPresentation(publicResponse.data[0]);
+        setchartData(publicResponse.data[0].polls.map(
+            (poll: Poll) => poll.options.map(
+                (option: string) => ({
+                    option: option,
+                    responses: poll.responses.filter((response) =>
+                        response.selection == option).length
+                })
+            )
+        ));
     }
 
     function togglePresentationInfo() {
@@ -208,10 +223,19 @@ function Analytics() {
                 <div className="d-flex align-items-center justify-content-center mt-2">
                     <h2 className="mt-3">Poll Data</h2>
                 </div>
-                {publicPresentation.polls.map((poll, index) =>
+                {chartData && publicPresentation.polls.map((poll, index) =>
                     <div className="d-flex align-items-center justify-content-center mt-2
                             flex-column">
                         <h3>{poll.name}</h3>
+                        <ChartContainer config={chartConfig} className="min-h-[200px]">
+                            <BarChart accessibilityLayer data={chartData[index]}>
+                                <CartesianGrid vertical={false} />
+                                <XAxis dataKey="option" tickLine={false} tickMargin={10}
+                                    axisLine={false} />
+                                <ChartTooltip content={<ChartTooltipContent />} />
+                                <Bar dataKey="responses" fill="var(--color-responses)" radius={4} />
+                            </BarChart>
+                        </ChartContainer>
                         <Button variant="outline" className="rounded p-3"
                                 onClick={() => showResponses(index)}>
                             Show Responses

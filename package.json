@@ -31,6 +31,7 @@
     "react-bootstrap": "^2.10.10",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
+    "recharts": "^3.8.0",
     "rehype-prism-plus": "^2.0.2",
     "shadcn": "^4.20.1",
     "soffice": "^1.1.0",

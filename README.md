@@ -165,3 +165,6 @@ and the API's LLM.
 
 [Bootstrap](https://getbootstrap.com/docs/5.0/) and [shadcn/ui](https://ui.shadcn.com/docs/) were
 used prominently in this project, and so were their documentations as a reference.
+
+This [Stack Overflow](https://stackoverflow.com/questions/3665115/how-to-create-a-file-in-memory-for-user-to-download-but-not-through-server)
+page was used as inspiration for implementing the application's file download/export features.

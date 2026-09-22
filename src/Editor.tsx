@@ -10,7 +10,7 @@ import { customAlphabet } from "nanoid";
 import { z } from "zod"
 import { useParams } from "react-router-dom";
 
-import { presentMDToModel, presentMDToJSX } from "./deckconverter";
+import { presentMDToModel, presentMDToJSX, presentMDToODF } from "./deckconverter";
 
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
@@ -29,6 +29,20 @@ const API = "https://comp2140-3ea651da.uqcloud.net/api";
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
 
 const modelResponseSchema = z.object({ pmd: z.string() });
+
+/** Downloads a file to the user's computer containing the provided contents.
+ *
+ * @param filename - The name of the file to be downloaded.
+ * @param contents - The contents of the file to be downloaded.
+ * @param type     - The MIME type of the file to be downloaded.
+ */
+function toFileDownload(filename: string, contents: string, type: string) {
+    const element = Object.assign(document.createElement("a"), {
+        href: type + encodeURIComponent(contents),
+        download: filename
+    });
+    element.click();
+}
 
 /**
  * Sends a request to the LangChain API, which should respond with a PresentMD presentation about
@@ -557,19 +571,34 @@ function Editor() {
                         }}
                     />
 
-                    <div className="d-flex align-items-center mt-2">
-                        <Button className="mx-2 rounded" variant="outline" onClick={save}>
-                            Save/Share
-                        </Button>
-                        <input type="checkbox" className="mx-2"
-                            checked={isPublic} onChange={togglePublic}/>
-                        <label>Public</label>
-                        { code &&
-                            <Button className="mx-2 rounded" variant="outline"
-                                    onClick={deletePresentation}>
-                                Delete
+                    <div className="d-flex align-items-center justify-content-between">
+                        <div className="d-flex align-items-center mt-2">
+                            <Button className="mx-2 rounded" variant="outline" onClick={save}>
+                                Save/Share
                             </Button>
-                        }
+                            <input type="checkbox" className="mx-2"
+                                checked={isPublic} onChange={togglePublic}/>
+                            <label>Public</label>
+                            { code &&
+                                <Button className="mx-2 rounded" variant="outline"
+                                        onClick={deletePresentation}>
+                                    Delete
+                                </Button>
+                            }
+                        </div>
+                        <div className="d-flex align-items-center mt-2">
+                            <Button className="mx-2 rounded" variant="outline"
+                                    onClick={() => toFileDownload(
+                                    model.title + ".md", md, "data:text/plain;charset=utf-8,")}>
+                                Download MD
+                            </Button>
+                            <Button className="mx-2 rounded" variant="outline"
+                                    onClick={() => toFileDownload(
+                                        model.title + ".fodp", presentMDToODF(md),
+                                        "data:text/plain;charset=utf-8,")}>
+                                Export ODF
+                            </Button>
+                        </div>
                     </div>
 
                     <div className="d-flex align-items-center mt-2">

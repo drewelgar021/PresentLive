@@ -272,6 +272,7 @@ function Editor() {
         return model.slides.filter((slide) => slide.poll ? true : false)
             .map((slide) => { return {
                 name: slide.poll ?? "",
+                options: JSON.parse(slide.options ?? "[]") ?? [],
                 responses: []
             }});
     }
@@ -326,7 +327,12 @@ function Editor() {
         // Overwrite currently existing presentation.
         const existingPollNames: string[] = existing.data[0].polls.map((poll: Poll) => poll.name);
         const polls = [
-            ...existing.data[0].polls,
+            // Update existing polls but keep responses.
+            ...existing.data[0].polls.map((poll: Poll) => ({
+                ...getPolls().filter((poll2) => poll.name == poll2.name)[0],
+                responses: poll.responses
+            })),
+            // Add new polls with empty responses array.
             ...getPolls().filter((poll) => !(existingPollNames.includes(poll.name)))
         ];
         return await fetch(`${API}/public/${existing.data[0].id}`,

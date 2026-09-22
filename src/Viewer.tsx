@@ -269,7 +269,7 @@ function PollForm(props: {
 
         const body = { polls: [
             ...otherPolls, {
-                name: currentPoll.name,
+                ...currentPoll,
                 responses: [
                     ...currentPoll.responses,
                     { responder: props.displayName, selection: selected }

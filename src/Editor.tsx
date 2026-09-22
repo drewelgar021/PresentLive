@@ -30,6 +30,14 @@ const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
 
 const modelResponseSchema = z.object({ pmd: z.string() });
 
+/**
+ * Sends a request to the LangChain API, which should respond with a PresentMD presentation about
+ * the provided topic.
+ *
+ * @param topic - The topic used to generate a presentation.
+ *
+ * @return The PresentMD for the generated presentation.
+ */
 async function fetchLLMPresentation(topic: string) {
     const data = await fetch("http://localhost:3001/api/generate-presentation", {
         method: "POST",
@@ -361,9 +369,11 @@ function Editor() {
      * Otherwise POSTs with a new, randomly generated code.
      * If a new code is generated, the code is also updated in state.
      *
-     * @return The uniquely generated presentation code that can be used to load the saved
-     *         presentation into the editor.
-     * */
+     * @param publicCode - The public code to use for this presentation.
+     *                     If undefined, then the presentation is private.
+     *
+     * @return The presentation's private code, whether it already exists or is newly generated.
+     */
     async function postPMD(publicCode: string | undefined) {
         const newCode = code ?? await codeGenerator();
         if (!newCode) {
@@ -477,6 +487,12 @@ function Editor() {
         }
     }
 
+    /**
+     * Resets all state variables to their default values, resetting the state of the editor.
+     * The `md` parameter can be specified to determine the initial contents of the text editor.
+     *
+     * @param md - The initial contents of the text editor for when the editor is reset.
+     */
     function newPresentation(md: string = PLACEHOLDER_PMD) {
         setcode(undefined);
         setmd(md);
@@ -489,6 +505,11 @@ function Editor() {
     }
 
 
+    /**
+     * Generates a presentation about the topic in state variable `prompt` by calling the LangChain
+     * API.
+     * The result is stored in the `md` state variable, and the editor preview is updated.
+     */
     async function generate() {
         setisGenerating(true);
         if (prompt && prompt.trim().length > 0) {

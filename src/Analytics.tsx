@@ -28,6 +28,12 @@ function Analytics() {
         }
     }, [urlCode]);
 
+    /**
+     * Sets the state variables privatePresentation and publicPresentation to the API entities that
+     * correspond to the private code provided.
+     *
+     * @param code - The private code identifying the presentation to load.
+     */
     async function getPresentation(code: string) {
         const privateResponse = await fetch(`${API}/presentmd?code=${code}`,
             {
@@ -96,14 +102,24 @@ function Analytics() {
         ));
     }
 
+    /**
+     * Toggles whether the table of presentation info is shown.
+     */
     function togglePresentationInfo() {
         setshowInfo(!showInfo);
     }
 
+    /**
+     * Toggles whether the viewers table is shown.
+     */
     function toggleViewers() {
         setshowViewers(!showViewers);
     }
 
+    /**
+     * Resets all state variables to their initial values.
+     * This unloads the presentation and displays the code input screen.
+     */ 
     function exit() {
         setprivatePresentation(undefined);
         setpublicPresentation(undefined);
@@ -212,9 +228,10 @@ function Analytics() {
                                 <th>Time Viewed</th>
                             </tr></thead>
                             <tbody>
-                                {publicPresentation.viewers.sort((v1, v2) =>  v2.datetime - v1.datetime).map((viewer) => <tr>
-                                    <td>{viewer.name}</td>
-                                    <td>{new Date(viewer.datetime).toString()}</td>
+                                {publicPresentation.viewers.sort((v1, v2) =>
+                                    v2.datetime - v1.datetime).map((viewer) => <tr>
+                                        <td>{viewer.name}</td>
+                                        <td>{new Date(viewer.datetime).toString()}</td>
                                 </tr>)}
                             </tbody>
                         </table>
@@ -224,7 +241,7 @@ function Analytics() {
                     <h2 className="mt-3">Poll Data</h2>
                 </div>
                 {chartData && publicPresentation.polls.map((poll, index) =>
-                    <div className="d-flex align-items-center justify-content-center mt-2
+                    <div className="d-flex align-items-center justify-content-center mb-5
                             flex-column">
                         <h3>{poll.name}</h3>
                         <ChartContainer config={chartConfig} className="min-h-[200px]">

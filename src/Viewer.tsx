@@ -233,6 +233,11 @@ function PollForm(props: {
     }
     const options = JSON.parse(props.slide.options);
 
+    /**
+     * Submits a poll response containing `props.displayName` and state variable `selected`.
+     * 
+     * @param e - Submit event from the form used to submit a poll response.
+     */
     async function submitPoll(e: React.SubmitEvent) {
         e.preventDefault();
         if (!selected) {

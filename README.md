@@ -103,13 +103,30 @@ API key.
   Select an option and click the "Submit" button to submit your response.
 
 ### Workflow
-1. Enter a public presentation code (the one starting with `w-`) and display name into the
+1. Navigate to the "Watch" tab.
+2. Enter a public presentation code (the one starting with `w-`) and display name into the
    respective text inputs and click "Join" to start a presentation.
-2. Click the "Next" button to advance to the next slide.
-3. When a poll slide is reached, use the form below the preview window to submit a response to the
+3. Click the "Next" button to advance to the next slide.
+4. When a poll slide is reached, use the form below the preview window to submit a response to the
    poll.
    The slide will be advanced upon submission.
-4. When the end of the presentation is reached, click "Exit" to exit the presentation.
+5. When the end of the presentation is reached, click "Exit" to exit the presentation.
+
+## Presentation Analytics
+- View presentation info.
+- If a presentation is public, see viewer information and poll responses in graph form, or a list of
+  individual responses with viewers' display names.
+- List view data is collapsed by default as the tables can get quite large; click "Show ..." to
+  expand them.
+
+### Workflow
+1. Navigate to the "Analytics" tab.
+2. Type in a private presentation code, or append `/<code>` to the URL to load analytics.
+3. Click "Show Presentation Info" to view presentation info in table form, showing how the
+   presentation is stored in the API.
+4. If the presentation is public, you can also view viewer info and poll responses.
+5. Hover over bars in the poll response bar charts to see exact numbers.
+   Click "Show Responses" below the chart to view individual responses.
 
 ## Satisfaction of Functionality Requirements
 
@@ -136,7 +153,9 @@ type PollResponse = { responder: string, selection: string }
 
 - These data entities are stored and retrieved via the RESTful API provided by the course.
 - Records can be added, deleted, and edited using the GUI controls in the app.
-- Text inputs are validated with alerts to display success or failure of inputs.
+- Text inputs are validated with alerts to display success or failure of input submissions.
+  - Alerts contain user friendly messages, while console errors contain more specific error info.
+- Data is available in list form in the "Analytics" tab.
 
 ### Data Collection and Interaction
 - All data collected is intended to be used again in the app.

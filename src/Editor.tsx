@@ -26,7 +26,9 @@ const PLACEHOLDER_PMD = "---\n"
                       + "Start writing your presentation here.\n"
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
+const API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJraW5kIjoic3R1ZGVudCIsInVpZCI6NDI1LCJ2ZXIiOjEsImlzcyI6InVxLWdlbmVyYWwtYXBpIiwic3ViIjoiczQ5NTk5NzMiLCJpYXQiOjE3ODg4NTIxOTAsImV4cCI6MTgyMDM4ODE5MH0.P5Yc2gW8_VCYnkOwg0lqXp8WRpaCNccl8fSsgBLxZKg"
 const CODE_ALPHABET = "abcdefghijklmnopqrstuvwxyz1234567890";
+
 
 const modelResponseSchema = z.object({ pmd: z.string() });
 
@@ -88,7 +90,7 @@ async function codeGenerator() {
         {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                "Authorization": `Bearer ${API_KEY}`
             }
         }).then((response) => response.ok ?
             response.json() :
@@ -118,7 +120,7 @@ async function publicCodeGenerator() {
         {
             method: "GET",
             headers: {
-                "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                "Authorization": `Bearer ${API_KEY}`
             }
         }
     )
@@ -177,7 +179,7 @@ function Editor() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                    "Authorization": `Bearer ${API_KEY}`
                 }
             }
         ).then((response) => response.ok ?
@@ -218,7 +220,7 @@ function Editor() {
         await fetch(`${API}/presentmd/${id}`,
             {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                headers: { "Authorization": `Bearer ${API_KEY}` }
         })
         .then((response) => response.ok ? {}
             : Promise.reject(new Error(response.statusText ?? "Unknown error.")))
@@ -235,7 +237,7 @@ function Editor() {
         await fetch(`${API}/public/${id}`,
             {
                 method: "DELETE",
-                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                headers: { "Authorization": `Bearer ${API_KEY}` }
         })
         .then((response) => response.ok ? {}
             : Promise.reject(new Error(response.statusText ?? "Unknown error.")))
@@ -250,7 +252,7 @@ function Editor() {
         const privateTarget = await fetch (`${API}/presentmd?code=${code}`,
             {
                 method: "GET",
-                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                headers: { "Authorization": `Bearer ${API_KEY}` }
         })
         .then((response) => response.ok ?
             response.json() :
@@ -266,7 +268,7 @@ function Editor() {
         const publicTarget= await fetch (`${API}/public?public_code=${publicCode}`,
             {
                 method: "GET",
-                headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                headers: { "Authorization": `Bearer ${API_KEY}` }
         })
         .then((response) => response.ok ?
             response.json() :
@@ -318,7 +320,7 @@ function Editor() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                    "Authorization": `Bearer ${API_KEY}`
                 }
             })
             .then((response) => response.ok ?
@@ -337,7 +339,7 @@ function Editor() {
                     body: JSON.stringify({ ...body, polls: getPolls()}),
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                        "Authorization": `Bearer ${API_KEY}`,
                     }
                 }
             ).then((response) => response.ok ?
@@ -367,7 +369,7 @@ function Editor() {
                 }),
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                    "Authorization": `Bearer ${API_KEY}`,
                 }
             }
         ).then((response) => response.ok ?
@@ -402,7 +404,7 @@ function Editor() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                    "Authorization": `Bearer ${API_KEY}`
                 }
             })
             .then((response) => response.ok ?
@@ -419,7 +421,7 @@ function Editor() {
                     body: JSON.stringify(body),
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                        "Authorization": `Bearer ${API_KEY}`,
                     }
                 }
             ).then((response) => response.ok ?
@@ -434,7 +436,7 @@ function Editor() {
                 body: JSON.stringify(body),
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`,
+                    "Authorization": `Bearer ${API_KEY}`,
                 }
             }
         ).then((response) => response.ok ?
@@ -453,7 +455,7 @@ function Editor() {
             const codes = await fetch(`${API}/public?public_code=${publicCode}`,
                 {
                     method: "GET",
-                    headers: { "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}` }
+                    headers: { "Authorization": `Bearer ${API_KEY}` }
                 }
             ).then((response) => response.ok ?
                 response.json() :

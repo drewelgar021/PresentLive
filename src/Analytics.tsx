@@ -8,6 +8,7 @@ import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig }
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
 const API = "https://comp2140-3ea651da.uqcloud.net/api";
+const API_KEY = "eyJhbGciOiJIUzI1NiJ9.eyJraW5kIjoic3R1ZGVudCIsInVpZCI6NDI1LCJ2ZXIiOjEsImlzcyI6InVxLWdlbmVyYWwtYXBpIiwic3ViIjoiczQ5NTk5NzMiLCJpYXQiOjE3ODg4NTIxOTAsImV4cCI6MTgyMDM4ODE5MH0.P5Yc2gW8_VCYnkOwg0lqXp8WRpaCNccl8fSsgBLxZKg"
 
 function Analytics() {
     const [loadCode, setloadCode] = useState<string>("");
@@ -39,7 +40,7 @@ function Analytics() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                    "Authorization": `Bearer ${API_KEY}`
                 }
             }
         ).then((response) => response.ok ?
@@ -70,7 +71,7 @@ function Analytics() {
             {
                 method: "GET",
                 headers: {
-                    "Authorization": `Bearer ${import.meta.env.VITE_API_KEY}`
+                    "Authorization": `Bearer ${API_KEY}`
                 }
             }
         ).then((response) => response.ok ?
